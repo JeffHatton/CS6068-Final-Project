@@ -55,6 +55,15 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Oregan_Trail_Sim.py" />
+    <Compile Include="Pathing\Pather.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Pathing\PriorityQueue.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Pathing\__init__.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="TileControl.py">
       <SubType>Code</SubType>
     </Compile>
@@ -81,6 +90,7 @@
     <Folder Include="Actors\" />
     <Folder Include="Data\" />
     <Folder Include="Ids\" />
+    <Folder Include="Pathing\" />
     <Folder Include="Tiles\" />
     <Folder Include="Villlages\" />
     <Folder Include="Villlages\Buildings\" />

@@ -38,7 +38,7 @@ class Application(Frame):
         self.createWidgets()
         self.tileControls = list()
 
-        self.dataStore = Data.DataStore.DataStore(10,10,5)        
+        self.dataStore = Data.DataStore.DataStore(10,10,1)        
         for key, value in self.dataStore.EnvTiles.iteritems():
             (x,y) = self.dataStore.TileIdConverter.Convert1dTo2d(key)
             tileControl = TileControl(value, self)

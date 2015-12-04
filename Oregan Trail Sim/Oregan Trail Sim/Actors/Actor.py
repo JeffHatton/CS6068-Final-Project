@@ -11,6 +11,8 @@ class Actor(Thread):
         Thread.__init__(self)
         self.DataStore = dataStore
         self.ID = Ids.Id.Id(True)
+        self.CurrentAction = "Idle"
+        self.CurrentTask = "Idle"
 
     def run(self):        
         for x in range(10):            
