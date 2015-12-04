@@ -3,7 +3,7 @@ import math
 class Village(object):
     """description of class"""
 
-    def __init__(self):
+    def __init__(self, dataStore):
         self.Center = (-1 ,-1)
         self.ResourceLock = Lock()
         self.ActiveProjects = list()
@@ -11,11 +11,12 @@ class Village(object):
         self.Resources["Wood"] = 0
         self.Resources["Food"] = 0
         self.Resources["Stone"] = 0
+        self.DataStore = dataStore
 
     def addResource(self, resourceChanges):
         self.ResourceLock.acquire()        
         for resourceType, changeValue in resourceChanges:
-            print("{0} {1} Collected").format(changeValue, resourceType)
+            self.DataStore.Logger.addToLog("{0} {1} Collected".format(changeValue, resourceType), 3)
             if resourceType not in self.Resources.keys():
                 self.Resources[resourceType] = changeValue
             else:
@@ -30,7 +31,7 @@ class Village(object):
         if resourceType not in self.Resources.keys():
             return returnAmount
 
-        print("{0} {1} Requested").format(amount, resourceType)
+        self.DataStore.Logger.addToLog("{0} {1} Requested".format(amount, resourceType), 3)
         if self.Resources[resourceType] >= amount:
             self.Resources[resourceType] -= amount
             returnAmount = amount

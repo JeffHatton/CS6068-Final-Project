@@ -37,7 +37,7 @@ class LivingActor(Actor):
         (curX, curY) = self.DataStore.TileIdConverter.Convert1dTo2d(self.CurrentTile.ID.LocalId)
         
         path = list()
-        print("Attempting to find path to {0}").format((desX, desY))
+        self.DataStore.Logger.addToLog("Attempting to find path to {0}".format((desX, desY)), 4)
         while curX != desX or curY != desY:            
             if curX < desX:
                 if self.DataStore.EnvTiles[self.DataStore.TileIdConverter.Convert2dTo1d(curX + 1, curY)].Walkable:
@@ -54,7 +54,7 @@ class LivingActor(Actor):
                     curY = curY - 1           
 
             path.append(self.DataStore.TileIdConverter.Convert2dTo1d(curX,curY))
-            print("Adding {0} to path").format(self.DataStore.TileIdConverter.Convert2dTo1d(curX,curY))
+            self.DataStore.Logger.addToLog("Adding {0} to path".format(self.DataStore.TileIdConverter.Convert2dTo1d(curX,curY)), 4)
         return path
 
     def depositResouce(self, resourceType):
@@ -67,7 +67,7 @@ class LivingActor(Actor):
     def depositAllResources(self):
         resourcesToDeposit = ["Food", "Stone", "Wood"]
         resourceChangeRequest = list()
-        print(self.Inventory)
+        self.DataStore.Logger.addToLog(self.Inventory, 6)
         for resource in resourcesToDeposit:
             if resource in self.Inventory.keys():
                 if self.Inventory[resource] > 0:

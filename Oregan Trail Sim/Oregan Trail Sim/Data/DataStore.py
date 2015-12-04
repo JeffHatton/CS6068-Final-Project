@@ -4,7 +4,7 @@ import Villlages.Village
 
 from Tiles.TileGenerator import *
 from Actors.VilagerActor import *
-
+from Logger.Logger import *
 class DataStore(object):
     """Global Storage for Application"""
 
@@ -14,7 +14,8 @@ class DataStore(object):
         self.SetEnvironmentDim(x, y)
         self.ActorLock = threading.Lock()
         self.EnvLock = threading.Lock()
-        self.Village = Villlages.Village.Village()              
+        self.Village = Villlages.Village.Village(self)              
+        self.Logger = Logger(3)
         for tile in TileGenerator.generateTileGrid(x, y):
             tile.ID.LocalId = self.TileIdConverter.Convert2dTo1d(tile.ID.IdX,tile.ID.IdY)
             self.AddTile(tile)
@@ -47,7 +48,7 @@ class DataStore(object):
         print("Implement morpth Tile")
 
     def SetEnvironmentDim(self, x, y):
-        self.TileIdConverter = Ids.IdConverter.IdConverter(x, y, True)
+        self.TileIdConverter = Ids.IdConverter.IdConverter(x, y, False)
         self.EnvironmentDimX = x
         self.EnvironmentDimY = y
 

@@ -15,8 +15,6 @@ class Actor(Thread):
         self.CurrentTask = "Idle"
 
     def run(self):        
-        for x in range(10):            
-            print(self.ID.GUID)
-            time.sleep(random.randint(1000,3000) / 1000)
+        return
 
 

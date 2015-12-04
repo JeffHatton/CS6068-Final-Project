@@ -54,6 +54,12 @@
     <Compile Include="Ids\__init__.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Logger\Logger.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Logger\__init__.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Oregan_Trail_Sim.py" />
     <Compile Include="Pathing\Pather.py">
       <SubType>Code</SubType>
@@ -90,6 +96,7 @@
     <Folder Include="Actors\" />
     <Folder Include="Data\" />
     <Folder Include="Ids\" />
+    <Folder Include="Logger\" />
     <Folder Include="Pathing\" />
     <Folder Include="Tiles\" />
     <Folder Include="Villlages\" />

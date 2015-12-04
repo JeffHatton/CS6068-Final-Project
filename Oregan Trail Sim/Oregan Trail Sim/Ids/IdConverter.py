@@ -18,5 +18,5 @@ class IdConverter(object):
         if id > self.DimX * self.DimY -1 :
             return (-1,-1)
         else:
-            return (floor(id / self.DimX), id % self.DimX) if self.ColumnMajor else (floor(id / self.DimY), id % self.DimY)
+            return  (floor(id / self.DimY), id % self.DimY) if self.ColumnMajor else (id % self.DimX, floor(id / self.DimX))
 
