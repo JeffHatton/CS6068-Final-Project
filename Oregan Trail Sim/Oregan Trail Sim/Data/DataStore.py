@@ -1,22 +1,27 @@
 ﻿import Ids.IdConverter
 import threading
-
 import Villlages.Village
-import Tiles.TileGenerator
+
+from Tiles.TileGenerator import *
+from Actors.VilagerActor import *
 
 class DataStore(object):
     """Global Storage for Application"""
 
-    def __init__(self, x, y):
+    def __init__(self, x, y, numVilagers):
         self.EnvActors = dict()
         self.EnvTiles = dict()
         self.SetEnvironmentDim(x, y)
         self.ActorLock = threading.Lock()
         self.EnvLock = threading.Lock()
         self.Village = Villlages.Village.Village()              
-        for tile in Tiles.TileGenerator.TileGenerator.generateTileGrid(x, y):
+        for tile in TileGenerator.generateTileGrid(x, y):
             tile.ID.LocalId = self.TileIdConverter.Convert2dTo1d(tile.ID.IdX,tile.ID.IdY)
             self.AddTile(tile)
+
+        for x in range(numVilagers):
+            actor = VilagerActor(self, self.EnvTiles[x /2 + y/2])
+            self.AddActor(actor)
 
     def AddActor(self, actor):
         self.ActorLock.acquire()
@@ -44,3 +49,7 @@ class DataStore(object):
         self.TileIdConverter = Ids.IdConverter.IdConverter(x, y, True)
         self.EnvironmentDimX = x
         self.EnvironmentDimY = y
+
+    def StartSim(self):
+        for key,actor in self.EnvActors.iteritems():
+            actor.start()

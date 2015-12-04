@@ -38,20 +38,14 @@ class Application(Frame):
         self.createWidgets()
         self.tileControls = list()
 
-        self.dataStore = Data.DataStore.DataStore(10,10)        
+        self.dataStore = Data.DataStore.DataStore(10,10,5)        
         for key, value in self.dataStore.EnvTiles.iteritems():
             (x,y) = self.dataStore.TileIdConverter.Convert1dTo2d(key)
             tileControl = TileControl(value, self)
             tileControl.grid(row=int(y + 1), column=int(x))
-            self.tileControls.append(tileControl)
+            self.tileControls.append(tileControl)    
 
-        for x in range(5):
-            actor = Actors.VilagerActor.VilagerActor(self.dataStore, self.dataStore.EnvTiles[5])
-            self.dataStore.AddActor(actor)
-        
-        for key,actor in self.dataStore.EnvActors.iteritems():
-            actor.start()
-
+        self.dataStore.StartSim()
         self.refresh()
 
     def refresh(self):
@@ -68,27 +62,4 @@ root = Tk()
 app = Application(master=root)
 app.mainloop()
 root.destroy()
-
-
-
-#for key, value in dataStore.EnvTiles.iteritems():
-#    print("{0}: {1}").format(key, value.GetActorCount())
-#print("")
-#print("")
-#print("")
-
-
-#for key, value in dataStore.EnvActors.iteritems():
-#    value.start()
-
-#while True:
-#    for key, value in dataStore.EnvTiles.iteritems():
-#        print("{0}: {1}").format(key, value.GetActorCount())
-#    print("")
-#    print("")
-#    print("")
-#    time.sleep(1)
-
-
-top = Tkinter.Tk()
 
