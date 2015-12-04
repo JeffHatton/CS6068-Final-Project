@@ -27,10 +27,19 @@
     <Compile Include="Actors\Actor.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Actors\LivingActor.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Actors\VilagerActor.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Actors\__init__.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="DataStore.py">
+    <Compile Include="Data\DataStore.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Data\__init__.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Ids\Id.py">
@@ -46,17 +55,35 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Oregan_Trail_Sim.py" />
+    <Compile Include="TileControl.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Tiles\Tile.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Tiles\TileGenerator.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Tiles\__init__.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Villlages\Buildings\__init__.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Villlages\Village.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Villlages\__init__.py">
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Actors\" />
+    <Folder Include="Data\" />
     <Folder Include="Ids\" />
     <Folder Include="Tiles\" />
+    <Folder Include="Villlages\" />
+    <Folder Include="Villlages\Buildings\" />
   </ItemGroup>
   <ItemGroup>
     <InterpreterReference Include="{9a7a9026-48c1-4688-9d5d-e5699d47d074}\2.7" />

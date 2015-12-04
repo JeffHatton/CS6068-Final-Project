@@ -2,9 +2,6 @@
 
 class IdConverter(object):
     """description of class"""
-    DimX
-    DimY
-    ColumnMajor
 
     def __init__(self, dimX, dimY, columnMajor):
         self.DimX = dimX
