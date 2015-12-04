@@ -21,7 +21,7 @@ class DataStore(object):
 
         for x in range(numVilagers):
             actor = VilagerActor(self, self.EnvTiles[x /2 + y/2])
-            actor.CurrentTask = "Gather"
+            #actor.CurrentTask = "Gather"
             self.AddActor(actor)
 
     def AddActor(self, actor):

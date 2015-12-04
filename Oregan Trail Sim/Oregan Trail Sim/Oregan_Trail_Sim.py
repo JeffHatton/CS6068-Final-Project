@@ -52,9 +52,9 @@ class Application(Frame):
         for control in self.tileControls:
             control.refresh()
 
-        self.lblWoodValue["text"] = self.dataStore.Village.Wood
-        self.lblFoodValue["text"] = self.dataStore.Village.Food
-        self.lblStoneValue["text"] = self.dataStore.Village.Stone
+        self.lblWoodValue["text"] = self.dataStore.Village.Resources["Wood"]
+        self.lblFoodValue["text"] = self.dataStore.Village.Resources["Food"]
+        self.lblStoneValue["text"] = self.dataStore.Village.Resources["Stone"]
         t = Timer(.1, self.refresh)
         t.start()
 

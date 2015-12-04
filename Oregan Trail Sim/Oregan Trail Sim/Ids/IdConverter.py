@@ -9,8 +9,14 @@ class IdConverter(object):
         self.ColumnMajor = columnMajor
 
     def Convert2dTo1d(self, x, y):
-        return y * self.DimX + x if self.ColumnMajor else x * self.DimY + y
+        if x >= self.DimX or y >= self.DimY or y < 0 or x < 0:
+            return -1
+        else:
+            return x * self.DimY + y if self.ColumnMajor else y * self.DimX + x
     
     def Convert1dTo2d(self, id):
-        return (floor(id / self.DimX), id % self.DimX) if self.ColumnMajor else (floor(id / self.DimY), id % self.DimY)
+        if id > self.DimX * self.DimY -1 :
+            return (-1,-1)
+        else:
+            return (floor(id / self.DimX), id % self.DimX) if self.ColumnMajor else (floor(id / self.DimY), id % self.DimY)
 
