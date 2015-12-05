@@ -1,6 +1,8 @@
 ﻿from Actor import *
 from Data.DataStore import *
 import math
+import time
+import timer
 
 class LivingActor(Actor):
     """description of class"""
@@ -10,14 +12,23 @@ class LivingActor(Actor):
         self.CurrentTile = tile
         self.CurrentTile.AddActor(self)
         self.HP = 0
-        self.CarryLimit = 5
-        self.Inventory = dict()
+        self.CarryLimit = 25
+        self.Inventory = dict()        
+        self.HungerLock = threading.Lock()
+        self.CriticalFoodLimit = 75
+        self.FoodGetLimit = 50
+
+        # Status of the actor
+        self.Status = "Healthy"
+
+        # Limit of hunger before actor dies
+        self.HungerLimit = 100
 
         # How hungry the actor is
         self.Hunger = 0
 
         # How quickly actor gets hungry hunger/s
-        self.HungerDisRate = 1
+        self.HungerDisRate = 10
 
         # Tiles/s
         self.MoveSpeed = .25
@@ -25,12 +36,18 @@ class LivingActor(Actor):
         self.CurrentMovePath = list()
 
         # Conversion factor for food to hunger
-        self.FoodToHungerConversion = 1
+        self.FoodToHungerConversion = 10        
 
     def MoveTo(self, Tile):
         self.CurrentTile.RemoveActor(self)
         self.CurrentTile = Tile
         Tile.AddActor(self)
+
+
+    def start(self):
+        self.LastTime = time.time()
+        self.hungerChecker()
+        Thread.start(self)
 
     def determinePath(self, tileId):
         (desX, desY) = self.DataStore.TileIdConverter.Convert1dTo2d(tileId)
@@ -79,12 +96,31 @@ class LivingActor(Actor):
     def getFood(self):
         self.CurrentTask = "GetFood"
         foodneeded = int(math.ceil(self.Hunger / self.FoodToHungerConversion))
-        self.Inventory["Food"] = self.DataStore.Village.requestResource("Food", foodneeded)
+        self.Inventory["Food"] = self.DataStore.Village.requestResource("Food", foodneeded, False)
 
     def eat(self):
+        self.HungerLock.acquire()
+        self.DataStore.Logger.addToLog("Actor {0} Old Hunger {1}".format(self.ID.GUID, self.Hunger), 0)
         self.Hunger -=  self.Inventory["Food"] * self.FoodToHungerConversion
+        if self.Hunger < 0:
+            self.Hunger = 0
+        self.DataStore.Logger.addToLog("Actor {0} New Hunger {1}".format(self.ID.GUID, self.Hunger), 0)
+        self.HungerLock.release()
         self.Inventory["Food"] = 0
+        self.CurrentTask = "Idle"
     
+    def StatusCheck(self):
+        if self.Hunger > self.HungerLimit:
+            self.Status = "Dead"
+            return
 
-
-
+    def hungerChecker(self):
+        timenow = time.time()
+        diff = timenow - self.LastTime
+        self.LastTime = timenow
+        self.HungerLock.acquire()
+        self.Hunger += diff * self.HungerDisRate
+        self.HungerLock.release()
+        self.DataStore.Logger.addToLog("Actor {0} Auto Hunger {1} Task {2}".format(self.ID.GUID, self.Hunger, self.CurrentTask), 0)
+        t = Timer(1, self.hungerChecker)
+        t.start()

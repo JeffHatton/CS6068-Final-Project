@@ -31,6 +31,13 @@ class Application(Frame):
         self.lblStoneValue = Label(self)
         self.lblStoneValue["text"] = "0"
         self.lblStoneValue.grid(row=0, column=5)
+
+        self.lblLiving = Label(self)
+        self.lblLiving["text"] = "Living:"
+        self.lblLiving.grid(row=0, column=4)
+        self.lblLivingValue = Label(self)
+        self.lblLivingValue["text"] = "0"
+        self.lblLivingValue.grid(row=0, column=5)
         
     def __init__(self, master=None):
         Frame.__init__(self, master)
@@ -38,7 +45,7 @@ class Application(Frame):
         self.createWidgets()
         self.tileControls = list()
 
-        self.dataStore = Data.DataStore.DataStore(10,10,1)        
+        self.dataStore = Data.DataStore.DataStore(10,10,15)        
         for key, value in self.dataStore.EnvTiles.iteritems():
             (x,y) = self.dataStore.TileIdConverter.Convert1dTo2d(key)
             tileControl = TileControl(value, self)
@@ -55,6 +62,7 @@ class Application(Frame):
         self.lblWoodValue["text"] = self.dataStore.Village.Resources["Wood"]
         self.lblFoodValue["text"] = self.dataStore.Village.Resources["Food"]
         self.lblStoneValue["text"] = self.dataStore.Village.Resources["Stone"]
+        self.lblLivingValue["text"] = len(self.dataStore.EnvActors)
         t = Timer(.1, self.refresh)
         t.start()
 

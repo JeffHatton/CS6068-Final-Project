@@ -5,6 +5,8 @@ import Villlages.Village
 from Tiles.TileGenerator import *
 from Actors.VilagerActor import *
 from Logger.Logger import *
+from Actors.NeedAnalyzer import *
+
 class DataStore(object):
     """Global Storage for Application"""
 
@@ -16,6 +18,10 @@ class DataStore(object):
         self.EnvLock = threading.Lock()
         self.Village = Villlages.Village.Village(self)              
         self.Logger = Logger(3)
+        self.OtherActors = dict()
+        needActor = NeedAnalyzer(self)
+        self.OtherActors[needActor.ID.GUID] = needActor
+        needActor.start()
         for tile in TileGenerator.generateTileGrid(x, y):
             tile.ID.LocalId = self.TileIdConverter.Convert2dTo1d(tile.ID.IdX,tile.ID.IdY)
             self.AddTile(tile)

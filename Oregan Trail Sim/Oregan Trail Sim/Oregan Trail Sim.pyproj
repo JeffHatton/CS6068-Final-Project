@@ -30,6 +30,9 @@
     <Compile Include="Actors\LivingActor.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Actors\NeedAnalyzer.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Actors\VilagerActor.py">
       <SubType>Code</SubType>
     </Compile>
@@ -86,6 +89,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Villlages\Village.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Villlages\VillageRequest.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Villlages\__init__.py">
