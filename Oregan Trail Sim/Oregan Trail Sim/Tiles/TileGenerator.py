@@ -9,7 +9,7 @@ class TileGenerator(object):
         listOfTiles = list()
         for x in range(dimX):
             for y in range(dimY):
-                randInt = random.randint(0,10)
+                randInt = random.randint(0,12)
                 tile = Tile.Tile()
                 tile.ID.IdX = x
                 tile.ID.IdY = y
@@ -22,6 +22,8 @@ class TileGenerator(object):
                     tile.ResourceType = "Stone"
                 elif randInt == 3:
                     tile.ResourceType = "Water"
+                elif randInt == 4:
+                    tile.ResourceType = "Iron"
                     #tile.Walkable = False
 
                 listOfTiles.append(tile)

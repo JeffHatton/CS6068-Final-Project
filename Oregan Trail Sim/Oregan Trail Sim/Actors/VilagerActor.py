@@ -1,6 +1,7 @@
 ﻿from LivingActor import *
 import random
 import time
+from Data.DataStore import *
 
 class VilagerActor(LivingActor):
     """description of class"""
@@ -14,7 +15,7 @@ class VilagerActor(LivingActor):
 
     def run(self):        
         while True:                
-            threadSleepTime = random.randint(500, 3000) / 1000
+            threadSleepTime = random.randint(1000, 2000) / 1000
 
             # Check if Villager is alive
             self.StatusCheck()
@@ -27,7 +28,22 @@ class VilagerActor(LivingActor):
             if self.Hunger >= self.CriticalFoodLimit:
                 self.CurrentTask = "GetFood"
 
-            self.DataStore.Logger.addToLog("Actor {0} doing Task {1} with Action {2}".format(self.ID.GUID, self.CurrentTask, self.CurrentAction), 5)
+            self.DataStore.Logger.addToLog("Actor {0} doing Task {1} with Action {2}".format(self.ID.GUID, self.CurrentTask, self.CurrentAction), 3)
+            if self.CurrentTask.startswith("Build:"):                     
+                if self.CurrentAction == "Idle":
+                    id = self.CurrentTask[6:]
+                    self.CurrentMovePath = self.determinePath(int(id))                                
+                    self.DataStore.Logger.addToLog(("Taking path {0}").format(self.CurrentMovePath),2)
+                    self.CurrentAction = "Moving"
+                if self.CurrentAction == "Moving":
+                    if self.Move() == 0:
+                        self.CurrentAction = "Build"
+                        self.DataStore.Logger.addToLog(("Reached Dest {0} start Building").format(self.CurrentTile.ID.LocalId), 3)
+                        self.CurrentTile.Structure.AddActor(self)                        
+                if self.CurrentAction == "Build":
+                    if self.CurrentTile.Structure.PercentBuilt == 100:
+                        self.CurrentTask = "Idle"
+                        self.CurrentAction = "Idle"
             if self.CurrentTask.startswith("Gather:"):                               
                 if self.CurrentAction == "Idle":
                     id = self.findNearestResourceTile(self.CurrentTask[7:])
@@ -37,16 +53,10 @@ class VilagerActor(LivingActor):
                             self.CurrentMovePath = self.determinePath(id)                                
                             self.DataStore.Logger.addToLog(("Taking path {0}").format(self.CurrentMovePath),5)
                             self.CurrentAction = "Moving"
-                            continueLoop = False     
                 elif self.CurrentAction == "Moving":
-                    if len(self.CurrentMovePath) == 0:
+                    if self.Move() == 0:
                         self.CurrentAction = "Gather"
                         self.DataStore.Logger.addToLog(("Reached Dest {0} start gathering").format(self.CurrentTile.ID.LocalId), 5)
-                    else:
-                        movePoint = self.CurrentMovePath.pop(0)
-                        self.MoveTo(self.DataStore.EnvTiles[movePoint])                        
-                        threadSleepTime = 1 / self.MoveSpeed
-                        self.DataStore.Logger.addToLog(("Moving to {0} wating {1} s before moving again").format(movePoint, threadSleepTime), 4)
                 elif self.CurrentAction == "Gather":
                     self.GatherFromTile()
                     self.depositAllResources()
@@ -124,5 +134,14 @@ class VilagerActor(LivingActor):
                 continueLoop = False
 
     def gatherRandomResource(self):
-        self.CurrentTask = ["Gather:Wood", "Gather:Food", "Gather:Stone"][random.randint(0,2)]
+        allResources = self.DataStore.AllResources()
+        self.CurrentTask = "Gather:" + allResources[random.randint(0,len(allResources) - 1)]
+
+    def Move(self):
+        if len(self.CurrentMovePath) > 0:
+            movePoint = self.CurrentMovePath.pop(0)
+            self.MoveTo(self.DataStore.EnvTiles[movePoint])                        
+            threadSleepTime = 1 / self.MoveSpeed
+            self.DataStore.Logger.addToLog(("Moving to {0} wating {1} s before moving again").format(movePoint, threadSleepTime), 4)
+        return len(self.CurrentMovePath)
 

@@ -85,6 +85,12 @@
     <Compile Include="Tiles\__init__.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Villlages\Buildings\Building.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Villlages\Buildings\StockPile.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Villlages\Buildings\__init__.py">
       <SubType>Code</SubType>
     </Compile>

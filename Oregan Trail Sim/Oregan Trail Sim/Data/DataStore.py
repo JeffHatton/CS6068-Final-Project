@@ -1,6 +1,8 @@
 ﻿import Ids.IdConverter
 import threading
 import Villlages.Village
+import Villlages.Buildings
+import Villlages.Buildings.StockPile
 
 from Tiles.TileGenerator import *
 from Actors.VilagerActor import *
@@ -26,10 +28,18 @@ class DataStore(object):
             tile.ID.LocalId = self.TileIdConverter.Convert2dTo1d(tile.ID.IdX,tile.ID.IdY)
             self.AddTile(tile)
 
-        for x in range(numVilagers):
+        for idx in range(numVilagers):
             actor = VilagerActor(self, self.EnvTiles[x /2 + y/2])
             #actor.CurrentTask = "Gather"
             self.AddActor(actor)
+
+        while True:
+            id = random.randint(0, (x * y) -1)
+            if self.EnvTiles[id].ResourceType == "None":
+                self.EnvTiles[id].Structure = Villlages.Buildings.StockPile.StockPile(self, self.EnvTiles[id])
+                self.Village.addNeeds([VillageRequest("Build:{0}".format(id), 0)])
+                self.Village.addNeeds([VillageRequest("Build:{0}".format(id), 0)])
+                break
 
     def AddActor(self, actor):
         self.ActorLock.acquire()
@@ -61,3 +71,6 @@ class DataStore(object):
     def StartSim(self):
         for key,actor in self.EnvActors.iteritems():
             actor.start()
+
+    def AllResources(self):
+        return ["Wood", "Food", "Stone", "Iron"]

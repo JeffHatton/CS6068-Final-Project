@@ -15,23 +15,23 @@ class LivingActor(Actor):
         self.CarryLimit = 25
         self.Inventory = dict()        
         self.HungerLock = threading.Lock()
-        self.CriticalFoodLimit = 75
+        self.CriticalFoodLimit = 90
         self.FoodGetLimit = 50
 
         # Status of the actor
         self.Status = "Healthy"
 
         # Limit of hunger before actor dies
-        self.HungerLimit = 100
+        self.HungerLimit = 200
 
         # How hungry the actor is
         self.Hunger = 0
 
         # How quickly actor gets hungry hunger/s
-        self.HungerDisRate = 10
+        self.HungerDisRate = .5
 
         # Tiles/s
-        self.MoveSpeed = .25
+        self.MoveSpeed = 2
         
         self.CurrentMovePath = list()
 
@@ -54,24 +54,31 @@ class LivingActor(Actor):
         (curX, curY) = self.DataStore.TileIdConverter.Convert1dTo2d(self.CurrentTile.ID.LocalId)
         
         path = list()
-        self.DataStore.Logger.addToLog("Attempting to find path to {0}".format((desX, desY)), 4)
+        self.DataStore.Logger.addToLog("{0} Attempting to find path to {1}".format(self.ID.GUID, (desX, desY)), 5)
         while curX != desX or curY != desY:            
             if curX < desX:
-                if self.DataStore.EnvTiles[self.DataStore.TileIdConverter.Convert2dTo1d(curX + 1, curY)].Walkable:
-                    curX = curX + 1
+                id = self.DataStore.TileIdConverter.Convert2dTo1d(curX + 1, curY)
+                if id >= 0:
+                    if self.DataStore.EnvTiles[id].Walkable:
+                        curX = curX + 1
             elif curX > desX:
-                if self.DataStore.EnvTiles[self.DataStore.TileIdConverter.Convert2dTo1d(curX - 1, curY)].Walkable:
-                    curX = curX - 1
-
+                id = self.DataStore.TileIdConverter.Convert2dTo1d(curX - 1, curY)
+                if id >= 0:
+                    if self.DataStore.EnvTiles[self.DataStore.TileIdConverter.Convert2dTo1d(curX - 1, curY)].Walkable:
+                        curX = curX - 1
             if curY < desY:
-                if self.DataStore.EnvTiles[self.DataStore.TileIdConverter.Convert2dTo1d(curX, curY + 1)].Walkable:
-                    curY = curY + 1
+                id = self.DataStore.TileIdConverter.Convert2dTo1d(curX, curY + 1)
+                if id >= 0:
+                    if self.DataStore.EnvTiles[self.DataStore.TileIdConverter.Convert2dTo1d(curX, curY + 1)].Walkable:
+                        curY = curY + 1
             elif curY > desY:
-                if self.DataStore.EnvTiles[self.DataStore.TileIdConverter.Convert2dTo1d(curX, curY - 1)].Walkable:
-                    curY = curY - 1           
+                id = self.DataStore.TileIdConverter.Convert2dTo1d(curX, curY - 1)
+                if id >= 0:
+                    if self.DataStore.EnvTiles[self.DataStore.TileIdConverter.Convert2dTo1d(curX, curY - 1)].Walkable:
+                        curY = curY - 1           
 
             path.append(self.DataStore.TileIdConverter.Convert2dTo1d(curX,curY))
-            self.DataStore.Logger.addToLog("Adding {0} to path".format(self.DataStore.TileIdConverter.Convert2dTo1d(curX,curY)), 4)
+            self.DataStore.Logger.addToLog("{0} Adding {1} to path {2} --- {3} ---- {4}".format(self.ID.GUID, self.DataStore.TileIdConverter.Convert2dTo1d(curX,curY), (curX, curY), (desX, desY), self.DataStore.TileIdConverter.Convert1dTo2d(tileId)),5)
         return path
 
     def depositResouce(self, resourceType):
@@ -82,10 +89,9 @@ class LivingActor(Actor):
                 self.Inventory[resourceType] = 0
 
     def depositAllResources(self):
-        resourcesToDeposit = ["Food", "Stone", "Wood"]
         resourceChangeRequest = list()
-        self.DataStore.Logger.addToLog(self.Inventory, 6)
-        for resource in resourcesToDeposit:
+        self.DataStore.Logger.addToLog(self.Inventory, 10)
+        for resource in  self.DataStore.AllResources():
             if resource in self.Inventory.keys():
                 if self.Inventory[resource] > 0:
                     resourceChangeRequest.append((resource, self.Inventory[resource]))
@@ -121,6 +127,7 @@ class LivingActor(Actor):
         self.HungerLock.acquire()
         self.Hunger += diff * self.HungerDisRate
         self.HungerLock.release()
-        self.DataStore.Logger.addToLog("Actor {0} Auto Hunger {1} Task {2}".format(self.ID.GUID, self.Hunger, self.CurrentTask), 0)
+        self.DataStore.Logger.addToLog("Actor {0} Auto Hunger {1} Task {2}".format(self.ID.GUID, self.Hunger, self.CurrentTask), 5)
         t = Timer(1, self.hungerChecker)
         t.start()
+

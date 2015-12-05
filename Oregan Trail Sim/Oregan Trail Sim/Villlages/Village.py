@@ -1,6 +1,7 @@
 ﻿from threading import *
 import math
 import random
+import Data.DataStore
 
 class Village(object):
     """description of class"""
@@ -11,7 +12,7 @@ class Village(object):
         self.WantsNeedsLock = Lock()
         self.ActiveProjects = list()
         self.Resources = dict()
-        self.Resources["Wood"] = 0
+        self.Resources["Wood"] = 100
         self.Resources["Food"] = 0
         self.Resources["Stone"] = 0
         self.DataStore = dataStore
@@ -28,6 +29,10 @@ class Village(object):
                 self.Resources[resourceType] += changeValue
 
         self.ResourceLock.release()
+
+    def requestResources(self, resourceChanges):
+        for resourceType, changeValue in resourceChanges.iteritems():
+            self.requestResource(resourceType, changeValue)
 
     def requestResource(self, resourceType, amount, allOrNothing = True):
         self.ResourceLock.acquire()        
@@ -78,4 +83,5 @@ class Village(object):
         else:
             # If nothing else is needed gather random
             self.WantsNeedsLock.release()
-            return ["Gather:Wood", "Gather:Food", "Gather:Stone"][random.randint(0,2)]
+            allResources = self.DataStore.AllResources()
+            return "Gather:" + allResources[random.randint(0,len(allResources) - 1)]
