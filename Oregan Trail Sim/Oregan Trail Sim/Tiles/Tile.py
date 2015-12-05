@@ -10,6 +10,8 @@ class Tile(threading.Thread):
         self.ActorLock = threading.Lock()
         self.Structure = None
         self.ResourceType = "None"
+        self.GatherAmountGiven = 5
+        self.GatherTime = 0
         self.Walkable = True
 
     def AddActor(self, actor):

@@ -38,6 +38,8 @@ class TileControl(Frame):
             return "Gray"
         elif type == "Water":
             return "Blue"
+        elif type == "Iron":
+            return "Pink"
         else:
             return "White"
 

@@ -12,9 +12,10 @@ class Village(object):
         self.WantsNeedsLock = Lock()
         self.ActiveProjects = list()
         self.Resources = dict()
+
+        for resource in dataStore.AllResources():
+            self.Resources[resource] = 0
         self.Resources["Wood"] = 100
-        self.Resources["Food"] = 0
-        self.Resources["Stone"] = 0
         self.DataStore = dataStore
         self.Needs = list()
         self.Wants = list()
@@ -39,6 +40,7 @@ class Village(object):
         returnAmount = 0             
 
         if resourceType not in self.Resources.keys():
+            self.ResourceLock.release()    
             return returnAmount
 
         self.DataStore.Logger.addToLog("{0} {1} Requested".format(amount, resourceType), 3)
@@ -85,3 +87,6 @@ class Village(object):
             self.WantsNeedsLock.release()
             allResources = self.DataStore.AllResources()
             return "Gather:" + allResources[random.randint(0,len(allResources) - 1)]
+
+    def VillageHasNeeds(self):
+        return len(self.Needs) > 0

@@ -33,7 +33,7 @@ class Building(object):
         #print(self.ActorsInTile)
         #print(self.ID.LocalId)
         del self.Wokers[actor.ID.GUID]
-        self.ActorLockLock.release()
+        self.Lock.release()
 
     def Build(self):
         timenow = time.time()
@@ -44,7 +44,7 @@ class Building(object):
 
         if self.PercentBuilt >= 100:
             self.PercentBuilt = 100
-            for actors in self.Wokers.values():
+            for actor in self.Wokers.values():
                 self.RemoveActor(actor)
 
             return

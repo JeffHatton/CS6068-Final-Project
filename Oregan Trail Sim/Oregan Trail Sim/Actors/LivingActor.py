@@ -13,6 +13,7 @@ class LivingActor(Actor):
         self.CurrentTile.AddActor(self)
         self.HP = 0
         self.CarryLimit = 25
+        self.CurrentInvCount = 0;
         self.Inventory = dict()        
         self.HungerLock = threading.Lock()
         self.CriticalFoodLimit = 90
@@ -83,10 +84,10 @@ class LivingActor(Actor):
 
     def depositResouce(self, resourceType):
         #path to store house
-        if resourceType in self.Inventory:
+        if resourceType in self.Inventory.keys():
             if self.Inventory[resourceType] > 0:                
                 self.DataStore.Village.addResource([(resourceType, self.Inventory[resourceType])])
-                self.Inventory[resourceType] = 0
+                self.AddInventory(resourceType, -self.Inventory[resourceType])
 
     def depositAllResources(self):
         resourceChangeRequest = list()
@@ -95,14 +96,16 @@ class LivingActor(Actor):
             if resource in self.Inventory.keys():
                 if self.Inventory[resource] > 0:
                     resourceChangeRequest.append((resource, self.Inventory[resource]))
-                    self.Inventory[resource] = 0
+                    self.AddInventory(resource, -self.Inventory[resource])
         if len(resourceChangeRequest) > 0:
             self.DataStore.Village.addResource(resourceChangeRequest)
 
     def getFood(self):
         self.CurrentTask = "GetFood"
+        self.eat()
         foodneeded = int(math.ceil(self.Hunger / self.FoodToHungerConversion))
-        self.Inventory["Food"] = self.DataStore.Village.requestResource("Food", foodneeded, False)
+        foodAmount = self.DataStore.Village.requestResource("Food", foodneeded, False)
+        self.AddInventory("Food", foodAmount)
 
     def eat(self):
         self.HungerLock.acquire()
@@ -112,7 +115,7 @@ class LivingActor(Actor):
             self.Hunger = 0
         self.DataStore.Logger.addToLog("Actor {0} New Hunger {1}".format(self.ID.GUID, self.Hunger), 0)
         self.HungerLock.release()
-        self.Inventory["Food"] = 0
+        self.AddInventory("Food", -self.Inventory["Food"])
         self.CurrentTask = "Idle"
     
     def StatusCheck(self):
@@ -131,3 +134,14 @@ class LivingActor(Actor):
         t = Timer(1, self.hungerChecker)
         t.start()
 
+    def AddInventory(self, resourceType, amount):
+
+        if amount + self.CurrentInvCount > self.CarryLimit:
+            amount = CarryLimit - self.CurrentInvCount
+
+        if resourceType in self.Inventory.keys():
+            self.CurrentInvCount += amount
+            self.Inventory[resourceType] += amount
+        else:
+            self.CurrentInvCount += amount
+            self.Inventory[resourceType] = amount

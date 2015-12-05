@@ -15,7 +15,7 @@ class VilagerActor(LivingActor):
 
     def run(self):        
         while True:                
-            threadSleepTime = random.randint(1000, 2000) / 1000
+            threadSleepTime = random.randint(1000, 1000) / 1000
 
             # Check if Villager is alive
             self.StatusCheck()
@@ -29,98 +29,62 @@ class VilagerActor(LivingActor):
                 self.CurrentTask = "GetFood"
 
             self.DataStore.Logger.addToLog("Actor {0} doing Task {1} with Action {2}".format(self.ID.GUID, self.CurrentTask, self.CurrentAction), 3)
-            if self.CurrentTask.startswith("Build:"):                     
-                if self.CurrentAction == "Idle":
-                    id = self.CurrentTask[6:]
-                    self.CurrentMovePath = self.determinePath(int(id))                                
-                    self.DataStore.Logger.addToLog(("Taking path {0}").format(self.CurrentMovePath),2)
-                    self.CurrentAction = "Moving"
-                if self.CurrentAction == "Moving":
-                    if self.Move() == 0:
-                        self.CurrentAction = "Build"
-                        self.DataStore.Logger.addToLog(("Reached Dest {0} start Building").format(self.CurrentTile.ID.LocalId), 3)
-                        self.CurrentTile.Structure.AddActor(self)                        
-                if self.CurrentAction == "Build":
-                    if self.CurrentTile.Structure.PercentBuilt == 100:
-                        self.CurrentTask = "Idle"
-                        self.CurrentAction = "Idle"
-            if self.CurrentTask.startswith("Gather:"):                               
-                if self.CurrentAction == "Idle":
-                    id = self.findNearestResourceTile(self.CurrentTask[7:])
-                    if id > -1:
-                        self.DataStore.Logger.addToLog(("Trying to move to {0} Tile Type: {1} From {2}").format(id, self.DataStore.EnvTiles[id].ResourceType, self.CurrentTile.ID.LocalId), 5)
-                        if self.DataStore.EnvTiles[id].Walkable:                                       
-                            self.CurrentMovePath = self.determinePath(id)                                
-                            self.DataStore.Logger.addToLog(("Taking path {0}").format(self.CurrentMovePath),5)
-                            self.CurrentAction = "Moving"
-                elif self.CurrentAction == "Moving":
-                    if self.Move() == 0:
-                        self.CurrentAction = "Gather"
-                        self.DataStore.Logger.addToLog(("Reached Dest {0} start gathering").format(self.CurrentTile.ID.LocalId), 5)
-                elif self.CurrentAction == "Gather":
-                    self.GatherFromTile()
-                    self.depositAllResources()
-                    self.CurrentAction = "Idle"
-                    self.CurrentTask = "Idle"
-                    self.DataStore.Logger.addToLog(("Gathering"), 4)
+            if self.CurrentTask.startswith("Build:"):          
+                self.HandleBuildTask()                           
+            if self.CurrentTask.startswith("Gather:"):      
+                self.HandleGatherTask()                                         
             elif self.CurrentTask == "Idle":
-                if self.Hunger > self.FoodGetLimit:
-                    self.getFood()
-                    self.eat()
-                self.CurrentTask = self.DataStore.Village.giveWork()
+                self.HandleIdleTask()                
             elif self.CurrentTask == "GetFood":
-                self.getFood()
-                self.eat()
-                self.CurrentTask = "Idle"
+                self.HandleGetFoodTask()
+            elif self.CurrentTask == "Deposit":
+                self.HandleDepositResources()
 
-            #self.Hunger += random.randint(0,2)
             self.DataStore.Logger.addToLog("Sleeping for {0}".format(threadSleepTime), 5)
             time.sleep(threadSleepTime)
 
     def GatherFromTile(self):
         self.DataStore.Logger.addToLog(("Attempting to gather from {0} Tile").format(self.CurrentTile.ResourceType), 4)
         if self.CurrentTile.ResourceType != "None":
-            if self.CurrentTile.ResourceType in self.Inventory.keys():
-                self.Inventory[self.CurrentTile.ResourceType] += self.CarryLimit                        
-            else:
-                self.Inventory[self.CurrentTile.ResourceType] = self.CarryLimit
+            self.AddInventory(self.CurrentTile.ResourceType, self.CurrentTile.GatherAmountGiven)
             
     def findNearestResourceTile(self, resourceType):        
-        tileId = -1
-        self.DataStore.Logger.addToLog(("Trying to find {0} Tile").format(resourceType), 4)
-        for searchDistance in range(1,10):
-            for x in range(-searchDistance, searchDistance):
-                id = self.DataStore.TileIdConverter.Convert2dTo1d(self.CurrentTile.ID.IdX + x, self.CurrentTile.ID.IdY + searchDistance)
-                if id >= 0:
-                    self.DataStore.Logger.addToLog(("Examining {0} Type: {1}").format(id, self.DataStore.EnvTiles[id].ResourceType), 8)
-                    if self.DataStore.EnvTiles[id].ResourceType == resourceType:
-                        return id
-                        tileId = id
-                        break;
-                id = self.DataStore.TileIdConverter.Convert2dTo1d(self.CurrentTile.ID.IdX + x, self.CurrentTile.ID.IdY -searchDistance)
-                if id >= 0:
-                    self.DataStore.Logger.addToLog(("Examining {0} Type: {1}").format(id, self.DataStore.EnvTiles[id].ResourceType), 8)
-                    if self.DataStore.EnvTiles[id].ResourceType == resourceType:
-                        return id
-                        tileId = id
-                        break;
-            for y in range(-searchDistance, searchDistance):
-                id = self.DataStore.TileIdConverter.Convert2dTo1d(self.CurrentTile.ID.IdX + searchDistance, self.CurrentTile.ID.IdY + y)
-                if id >= 0:
-                    self.DataStore.Logger.addToLog(("Examining {0} Type: {1}").format(id, self.DataStore.EnvTiles[id].ResourceType), 8)
-                    if self.DataStore.EnvTiles[id].ResourceType == resourceType:
-                        return id
-                        tileId = id
-                        break;
-                id = self.DataStore.TileIdConverter.Convert2dTo1d(self.CurrentTile.ID.IdX -searchDistance, self.CurrentTile.ID.IdY + y)
-                if id >= 0:
-                    self.DataStore.Logger.addToLog(("Examining {0} Type: {1}").format(id, self.DataStore.EnvTiles[id].ResourceType), 8)
-                    if self.DataStore.EnvTiles[id].ResourceType == resourceType:
-                        return id
-                        tileId = id
-                        break;
-        self.DataStore.Logger.addToLog(("Found Tile {0}").format(tileId), 4)
-        return tileId
+        return self.searchTiles(resourceType, lambda tile, searchValue: tile.ResourceType == searchValue)
+        #tileId = -1
+        #self.DataStore.Logger.addToLog(("Trying to find {0} Tile").format(resourceType), 4)
+        #for searchDistance in range(1,10):
+        #    for x in range(-searchDistance, searchDistance):
+        #        id = self.DataStore.TileIdConverter.Convert2dTo1d(self.CurrentTile.ID.IdX + x, self.CurrentTile.ID.IdY + searchDistance)
+        #        if id >= 0:
+        #            self.DataStore.Logger.addToLog(("Examining {0} Type: {1}").format(id, self.DataStore.EnvTiles[id].ResourceType), 8)
+        #            if self.DataStore.EnvTiles[id].ResourceType == resourceType:
+        #                return id
+        #                tileId = id
+        #                break;
+        #        id = self.DataStore.TileIdConverter.Convert2dTo1d(self.CurrentTile.ID.IdX + x, self.CurrentTile.ID.IdY -searchDistance)
+        #        if id >= 0:
+        #            self.DataStore.Logger.addToLog(("Examining {0} Type: {1}").format(id, self.DataStore.EnvTiles[id].ResourceType), 8)
+        #            if self.DataStore.EnvTiles[id].ResourceType == resourceType:
+        #                return id
+        #                tileId = id
+        #                break;
+        #    for y in range(-searchDistance, searchDistance):
+        #        id = self.DataStore.TileIdConverter.Convert2dTo1d(self.CurrentTile.ID.IdX + searchDistance, self.CurrentTile.ID.IdY + y)
+        #        if id >= 0:
+        #            self.DataStore.Logger.addToLog(("Examining {0} Type: {1}").format(id, self.DataStore.EnvTiles[id].ResourceType), 8)
+        #            if self.DataStore.EnvTiles[id].ResourceType == resourceType:
+        #                return id
+        #                tileId = id
+        #                break;
+        #        id = self.DataStore.TileIdConverter.Convert2dTo1d(self.CurrentTile.ID.IdX -searchDistance, self.CurrentTile.ID.IdY + y)
+        #        if id >= 0:
+        #            self.DataStore.Logger.addToLog(("Examining {0} Type: {1}").format(id, self.DataStore.EnvTiles[id].ResourceType), 8)
+        #            if self.DataStore.EnvTiles[id].ResourceType == resourceType:
+        #                return id
+        #                tileId = id
+        #                break;
+        #self.DataStore.Logger.addToLog(("Found Tile {0}").format(tileId), 4)
+        #return tileId
 
     def moveToRandomTile(self):
         continueLoop = True       
@@ -145,3 +109,106 @@ class VilagerActor(LivingActor):
             self.DataStore.Logger.addToLog(("Moving to {0} wating {1} s before moving again").format(movePoint, threadSleepTime), 4)
         return len(self.CurrentMovePath)
 
+    def HandleBuildTask(self):
+        if self.CurrentAction == "Idle":
+            id = self.CurrentTask[6:]
+            self.CurrentMovePath = self.determinePath(int(id))                                
+            self.DataStore.Logger.addToLog(("Taking path {0}").format(self.CurrentMovePath),2)
+            self.CurrentAction = "Moving"
+        if self.CurrentAction == "Moving":
+            if self.Move() == 0:
+                self.CurrentAction = "Build"
+                self.DataStore.Logger.addToLog(("Reached Dest {0} start Building").format(self.CurrentTile.ID.LocalId), 3)
+                self.CurrentTile.Structure.AddActor(self)                        
+        if self.CurrentAction == "Build":
+            if self.CurrentTile.Structure.PercentBuilt == 100:
+                self.idleWork()
+
+    def HandleGatherTask(self):
+        if self.CurrentAction == "Idle":
+            id = self.findNearestResourceTile(self.CurrentTask[7:])
+            self.DataStore.Logger.addToLog(("Tile {0}").format(id), 2)
+            if id > -1:
+                self.findPath(id)
+        elif self.CurrentAction == "Moving":
+            if self.Move() == 0:
+                self.CurrentAction = "Gather"
+                self.DataStore.Logger.addToLog(("Reached Dest {0} start gathering").format(self.CurrentTile.ID.LocalId), 5)
+        elif self.CurrentAction == "Gather":
+            self.GatherFromTile()
+            if self.CurrentInvCount == self.CarryLimit:
+                self.CurrentTask = "Deposit"
+            elif self.DataStore.Village.VillageHasNeeds():
+                self.CurrentTask = "Idle"
+            self.CurrentAction = "Idle"
+            self.DataStore.Logger.addToLog(("Gathering"), 4)
+
+    def HandleIdleTask(self):
+        if self.Hunger > self.FoodGetLimit:
+            self.getFood()
+            self.eat()
+        self.CurrentTask = self.DataStore.Village.giveWork()
+
+    def HandleGetFoodTask(self):
+        self.getFood()
+        self.eat()
+        self.CurrentTask = "Idle"
+
+    def isBuildingType(self, tile, buildingType):
+        if tile.Structure != None:
+            if tile.Structure.BuildingType == buildingType:
+                return True
+        return False
+
+    def HandleDepositResources(self):
+        if self.CurrentAction == "Idle":
+            tileId = self.searchTiles("StockPile", self.isBuildingType)
+            if tileId >= 0:
+                self.findPath(tileId)
+        if self.CurrentAction == "Moving":
+            if self.Move() == 0:
+                self.CurrentAction = "Deposit"
+                self.DataStore.Logger.addToLog(("Reached Dest {0} start gathering").format(self.CurrentTile.ID.LocalId), 5)
+        if self.CurrentAction == "Deposit":
+            if self.CurrentTile.Structure.BuildingType == "StockPile":
+                self.depositAllResources()
+                self.idleWork()            
+            else:
+                self.CurrentAction = "Idle"
+    def searchTiles(self, searchValue, searchFunction):
+        tileId = -1
+
+        if  searchFunction(self.CurrentTile, searchValue):
+            return self.CurrentTile.ID.LocalId
+
+        for searchDistance in range(1,10):
+            for x in range(-searchDistance, searchDistance):
+                id = self.DataStore.TileIdConverter.Convert2dTo1d(self.CurrentTile.ID.IdX + x, self.CurrentTile.ID.IdY + searchDistance)
+                if id >= 0:                    
+                    if  searchFunction(self.DataStore.EnvTiles[id], searchValue):
+                        return id
+                id = self.DataStore.TileIdConverter.Convert2dTo1d(self.CurrentTile.ID.IdX + x, self.CurrentTile.ID.IdY -searchDistance)
+                if id >= 0:
+                    if searchFunction(self.DataStore.EnvTiles[id], searchValue):
+                        return id
+            for y in range(-searchDistance, searchDistance):
+                id = self.DataStore.TileIdConverter.Convert2dTo1d(self.CurrentTile.ID.IdX + searchDistance, self.CurrentTile.ID.IdY + y)
+                if id >= 0:
+                    if searchFunction(self.DataStore.EnvTiles[id], searchValue):
+                        return id
+                id = self.DataStore.TileIdConverter.Convert2dTo1d(self.CurrentTile.ID.IdX -searchDistance, self.CurrentTile.ID.IdY + y)
+                if id >= 0:                   
+                    if searchFunction(self.DataStore.EnvTiles[id], searchValue):
+                        return id
+        #self.DataStore.Logger.addToLog(("Found Tile {0}").format(tileId), 2)
+        return tileId
+
+    def findPath(self, id):
+        self.DataStore.Logger.addToLog(("Trying to move to {0} Tile Type: {1} From {2}").format(id, self.DataStore.EnvTiles[id].ResourceType, self.CurrentTile.ID.LocalId), 5)
+        self.CurrentMovePath = self.determinePath(id)                                
+        self.DataStore.Logger.addToLog(("Taking path {0}").format(self.CurrentMovePath),5)
+        self.CurrentAction = "Moving"
+
+    def idleWork(self):
+        self.CurrentTask = "Idle"
+        self.CurrentAction = "Idle"

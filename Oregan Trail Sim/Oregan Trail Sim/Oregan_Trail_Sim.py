@@ -32,12 +32,19 @@ class Application(Frame):
         self.lblStoneValue["text"] = "0"
         self.lblStoneValue.grid(row=0, column=5)
 
+        self.lblIron = Label(self)
+        self.lblIron["text"] = "Iron:"
+        self.lblIron.grid(row=0, column=6)
+        self.lblIronValue = Label(self)
+        self.lblIronValue["text"] = "0"
+        self.lblIronValue.grid(row=0, column=7)
+
         self.lblLiving = Label(self)
         self.lblLiving["text"] = "Living:"
-        self.lblLiving.grid(row=0, column=4)
+        self.lblLiving.grid(row=0, column=8)
         self.lblLivingValue = Label(self)
         self.lblLivingValue["text"] = "0"
-        self.lblLivingValue.grid(row=0, column=5)
+        self.lblLivingValue.grid(row=0, column=9)
         
     def __init__(self, master=None):
         Frame.__init__(self, master)
@@ -63,6 +70,7 @@ class Application(Frame):
         self.lblWoodValue["text"] = self.dataStore.Village.Resources["Wood"]
         self.lblFoodValue["text"] = self.dataStore.Village.Resources["Food"]
         self.lblStoneValue["text"] = self.dataStore.Village.Resources["Stone"]
+        self.lblIronValue["text"] = self.dataStore.Village.Resources["Iron"]
         self.lblLivingValue["text"] = len(self.dataStore.EnvActors)
         t = Timer(.1, self.refresh)
         t.start()
