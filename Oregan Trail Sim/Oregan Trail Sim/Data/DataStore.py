@@ -3,6 +3,7 @@ import threading
 import Villlages.Village
 import Villlages.Buildings
 import Villlages.Buildings.StockPile
+import xml.etree.ElementTree as ET
 
 from Tiles.TileGenerator import *
 from Actors.VilagerActor import *
@@ -12,7 +13,12 @@ from Actors.NeedAnalyzer import *
 class DataStore(object):
     """Global Storage for Application"""
 
-    def __init__(self, x, y, numVilagers):
+    def __init__(self, initFile): #x, y, numVillagers):
+        tree = ET.parse('init.xml')
+        root = tree.getroot()
+        x = int(root.attrib.get("width"))
+        y = int(root.attrib.get("height"))
+
         self.EnvActors = dict()
         self.EnvTiles = dict()
         self.SetEnvironmentDim(x, y)
@@ -28,7 +34,8 @@ class DataStore(object):
             tile.ID.LocalId = self.TileIdConverter.Convert2dTo1d(tile.ID.IdX,tile.ID.IdY)
             self.AddTile(tile)
 
-        for idx in range(numVilagers):
+        numVillagers = int(root.attrib.get("villagers"))
+        for idx in range(numVillagers):
             actor = VilagerActor(self, self.EnvTiles[x /2 + y/2])
             #actor.CurrentTask = "Gather"
             self.AddActor(actor)
