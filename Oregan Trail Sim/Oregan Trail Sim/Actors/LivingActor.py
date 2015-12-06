@@ -3,6 +3,7 @@ from Data.DataStore import *
 import math
 import time
 from threading import Timer
+import heapq
 
 class LivingActor(Actor):
     """description of class"""
@@ -58,6 +59,11 @@ class LivingActor(Actor):
         idNorth = self.DataStore.TileIdConverter.Convert2dTo1d(X, Y + 1)
         idSouth = self.DataStore.TileIdConverter.Convert2dTo1d(X, Y - 1)
 
+        idNorthEast = self.DataStore.TileIdConverter.Convert2dTo1d(X + 1, Y + 1)
+        idNorthWest = self.DataStore.TileIdConverter.Convert2dTo1d(X - 1, Y + 1)
+        idSouthEast = self.DataStore.TileIdConverter.Convert2dTo1d(X + 1, Y - 1)
+        idSouthWest = self.DataStore.TileIdConverter.Convert2dTo1d(X - 1, Y - 1)
+
         if idEast >= 0 and self.DataStore.EnvTiles[idEast].Walkable:
             result.append((path + [self.DataStore.TileIdConverter.Convert2dTo1d(X+1,Y)], (X+1, Y)))
         if idWest >= 0 and self.DataStore.EnvTiles[idWest].Walkable:
@@ -66,6 +72,15 @@ class LivingActor(Actor):
             result.append((path + [self.DataStore.TileIdConverter.Convert2dTo1d(X,Y+1)], (X, Y+1)))
         if idSouth >= 0 and self.DataStore.EnvTiles[idSouth].Walkable:
             result.append((path + [self.DataStore.TileIdConverter.Convert2dTo1d(X,Y-1)], (X, Y-1)))
+        
+        if idNorthEast >= 0 and self.DataStore.EnvTiles[idNorthEast].Walkable:
+            result.append((path + [self.DataStore.TileIdConverter.Convert2dTo1d(X+1,Y+1)], (X+1, Y+1)))
+        if idNorthWest >= 0 and self.DataStore.EnvTiles[idNorthWest].Walkable:
+            result.append((path + [self.DataStore.TileIdConverter.Convert2dTo1d(X-1,Y+1)], (X-1, Y+1)))
+        if idSouthEast >= 0 and self.DataStore.EnvTiles[idSouthEast].Walkable:
+            result.append((path + [self.DataStore.TileIdConverter.Convert2dTo1d(X+1,Y-1)], (X+1, Y-1)))
+        if idSouthWest >= 0 and self.DataStore.EnvTiles[idSouthWest].Walkable:
+            result.append((path + [self.DataStore.TileIdConverter.Convert2dTo1d(X-1,Y-1)], (X-1, Y-1)))
         
         return result
 
@@ -79,10 +94,11 @@ class LivingActor(Actor):
         (desX, desY) = self.DataStore.TileIdConverter.Convert1dTo2d(tileId)
         (curX, curY) = self.DataStore.TileIdConverter.Convert1dTo2d(self.CurrentTile.ID.LocalId)
 
-        frontier = [( ([], (curX, curY)), self.goalHeuristic(([], (curX, curY)), (desX, desY)) )]
+        frontier = []
+        heapq.heappush( frontier, (self.goalHeuristic(([], (curX, curY)), (desX, desY)), ([], (curX, curY))) )
         explored = {}
         while len(frontier) > 0:
-            (curNode, priority) = frontier.pop(0)
+            (priority, curNode) = heapq.heappop(frontier)
             if str(curNode[1]) in explored:
                 continue
             explored[str(curNode[1])] = 1
@@ -91,8 +107,7 @@ class LivingActor(Actor):
                     return testnode[0]
                 if str(testnode[1]) in explored:
                     continue
-                frontier.append((testnode, len(testnode[0]) + self.goalHeuristic(testnode, (desX,desY))))
-            frontier = sorted(frontier, key=lambda a: a[1])
+                heapq.heappush(frontier, (len(testnode[0]) + self.goalHeuristic(testnode, (desX,desY)), testnode))
         return []
 
     def determinePath(self, tileId):
