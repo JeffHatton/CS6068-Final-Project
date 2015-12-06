@@ -5,7 +5,8 @@ class TileGenerator(object):
     """description of class"""
 
     @staticmethod
-    def generateTileGrid(dimX, dimY):
+    def generateTileGrid(dimX, dimY, seed=None):
+        random.seed(seed)
         listOfTiles = list()
         for x in range(dimX):
             for y in range(dimY):

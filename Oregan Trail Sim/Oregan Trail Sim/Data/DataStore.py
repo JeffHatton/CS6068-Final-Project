@@ -18,6 +18,7 @@ class DataStore(object):
         root = tree.getroot()
         x = int(root.attrib.get("width"))
         y = int(root.attrib.get("height"))
+        seed = root.find("TileGenerator").text
 
         self.EnvActors = dict()
         self.EnvTiles = dict()
@@ -30,7 +31,7 @@ class DataStore(object):
         needActor = NeedAnalyzer(self)
         self.OtherActors[needActor.ID.GUID] = needActor
         needActor.start()
-        for tile in TileGenerator.generateTileGrid(x, y):
+        for tile in TileGenerator.generateTileGrid(x, y, seed):
             tile.ID.LocalId = self.TileIdConverter.Convert2dTo1d(tile.ID.IdX,tile.ID.IdY)
             self.AddTile(tile)
 
