@@ -3,6 +3,7 @@ import Data.DataStore
 import Actors.VilagerActor
 import Tiles.Tile
 import time
+import xml.etree.ElementTree as ET
 from Tkinter import *
 from TileControl import *
 from threading import *
@@ -52,7 +53,13 @@ class Application(Frame):
         self.createWidgets()
         self.tileControls = list()
 
-        self.dataStore = Data.DataStore.DataStore(10,10,3)        
+        tree = ET.parse('init.xml')
+        root = tree.getroot()
+        width = int(root.attrib.get("width"))
+        height = int(root.attrib.get("height"))
+        villagers = int(root.attrib.get("villagers"))
+
+        self.dataStore = Data.DataStore.DataStore(width,height,villagers)        
         for key, value in self.dataStore.EnvTiles.iteritems():
             (x,y) = self.dataStore.TileIdConverter.Convert1dTo2d(key)
             tileControl = TileControl(value, self)
