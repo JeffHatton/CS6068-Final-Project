@@ -51,7 +51,6 @@ class DataStore(object):
         if actore != None:
             del self.EnvActors[id]
             actor.stop_requested = True
-        print("Implement remove actor")
     
     def MorpthActor(self, id, newActorType):
         print("Implement morpth actor")
