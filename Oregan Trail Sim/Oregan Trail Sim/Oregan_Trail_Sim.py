@@ -52,6 +52,7 @@ class Application(Frame):
         self.pack()
         self.createWidgets()
         self.tileControls = list()
+        self.alive = True
 
         tree = ET.parse('init.xml')
         root = tree.getroot()
@@ -71,6 +72,8 @@ class Application(Frame):
         self.refresh()
 
     def refresh(self):
+        if not self.alive:
+            return
         for control in self.tileControls:
             control.refresh()
 
@@ -82,8 +85,14 @@ class Application(Frame):
         t = Timer(.1, self.refresh)
         t.start()
 
+    def onClose(self):
+        self.dataStore.EndSim()
+        self.alive = False
+        time.sleep(0.2)
+        self.master.destroy()
+
 root = Tk()
 app = Application(master=root)
+root.protocol("WM_DELETE_WINDOW", app.onClose)
 app.mainloop()
-root.destroy()
 

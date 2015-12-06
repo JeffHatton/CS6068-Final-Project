@@ -47,6 +47,10 @@ class DataStore(object):
         self.ActorLock.release()
 
     def RemoveActor(self, id):
+        actor = self.EnvActors.get(id, None)
+        if actore != None:
+            del self.EnvActors[id]
+            actor.stop_requested = True
         print("Implement remove actor")
     
     def MorpthActor(self, id, newActorType):
@@ -74,3 +78,10 @@ class DataStore(object):
 
     def AllResources(self):
         return ["Wood", "Food", "Stone", "Iron"]
+
+    def EndSim(self):
+        for key,actor in self.EnvActors.iteritems():
+            actor.stop_requested = True
+        for key,actor in self.OtherActors.iteritems():
+            actor.stop_requested = True
+        self.Logger.saveToFile()

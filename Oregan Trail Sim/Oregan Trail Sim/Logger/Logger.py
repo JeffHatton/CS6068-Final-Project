@@ -9,10 +9,6 @@ class Logger(object):
         self.LogLock = threading.Lock()
         self.LogMessage = ""
         self.PrintToConsole = True
-
-        # Handle File Output. TODO: Verify file location
-        self.PrintToFile = True
-        self.LogFile = open("Temp/" + time.strftime("%Y%m%d-%H%M%S") + ".txt", 'w')
        
     def addToLog(self, logMessage, logLevel):
         if logLevel <= self.LogLevel:
@@ -20,8 +16,10 @@ class Logger(object):
             self.LogMessage += logMessage + "\n"
             if self.PrintToConsole:
                 print(logMessage)
-            if self.PrintToFile:
-                self.LogFile.write(logMessage + "\n")
-                self.LogFile.flush()
             self.LogLock.release()
+
+    def saveToFile(self, filename = time.strftime("%Y%m%d-%H%M%S") + ".txt"):
+        self.LogFile = open("Temp/" + filename, 'w')
+        self.LogFile.write(self.LogMessage)
+        self.LogFile.close()
          
