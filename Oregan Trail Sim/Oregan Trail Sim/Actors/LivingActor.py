@@ -2,7 +2,7 @@
 from Data.DataStore import *
 import math
 import time
-import timer
+from threading import Timer
 
 class LivingActor(Actor):
     """description of class"""
