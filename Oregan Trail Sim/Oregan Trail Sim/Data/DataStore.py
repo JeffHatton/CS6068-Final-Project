@@ -3,6 +3,7 @@ import threading
 import Villlages.Village
 import Villlages.Buildings
 import Villlages.Buildings.StockPile
+import xml.etree.ElementTree as ET
 
 from Tiles.TileGenerator import *
 from Actors.VilagerActor import *
@@ -12,7 +13,13 @@ from Actors.NeedAnalyzer import *
 class DataStore(object):
     """Global Storage for Application"""
 
-    def __init__(self, x, y, numVilagers):
+    def __init__(self, initFile): #x, y, numVillagers):
+        tree = ET.parse('init.xml')
+        root = tree.getroot()
+        x = int(root.attrib.get("width"))
+        y = int(root.attrib.get("height"))
+        seed = root.find("TileGenerator").text
+
         self.EnvActors = dict()
         self.EnvTiles = dict()
         self.SetEnvironmentDim(x, y)
@@ -24,11 +31,12 @@ class DataStore(object):
         needActor = NeedAnalyzer(self)
         self.OtherActors[needActor.ID.GUID] = needActor
         needActor.start()
-        for tile in TileGenerator.generateTileGrid(x, y):
+        for tile in TileGenerator.generateTileGrid(x, y, seed):
             tile.ID.LocalId = self.TileIdConverter.Convert2dTo1d(tile.ID.IdX,tile.ID.IdY)
             self.AddTile(tile)
 
-        for idx in range(numVilagers):
+        numVillagers = int(root.attrib.get("villagers"))
+        for idx in range(numVillagers):
             actor = VilagerActor(self, self.EnvTiles[x /2 + y/2])
             #actor.CurrentTask = "Gather"
             self.AddActor(actor)
@@ -47,7 +55,10 @@ class DataStore(object):
         self.ActorLock.release()
 
     def RemoveActor(self, id):
-        print("Implement remove actor")
+        actor = self.EnvActors.get(id, None)
+        if actore != None:
+            del self.EnvActors[id]
+            actor.stop_requested = True
     
     def MorpthActor(self, id, newActorType):
         print("Implement morpth actor")
@@ -74,3 +85,10 @@ class DataStore(object):
 
     def AllResources(self):
         return ["Wood", "Food", "Stone", "Iron"]
+
+    def EndSim(self):
+        for key,actor in self.EnvActors.iteritems():
+            actor.stop_requested = True
+        for key,actor in self.OtherActors.iteritems():
+            actor.stop_requested = True
+        self.Logger.saveToFile()

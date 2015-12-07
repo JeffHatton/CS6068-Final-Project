@@ -51,8 +51,15 @@ class Application(Frame):
         self.pack()
         self.createWidgets()
         self.tileControls = list()
+        self.alive = True
 
-        self.dataStore = Data.DataStore.DataStore(10,10,3)        
+        #tree = ET.parse('init.xml')
+        #root = tree.getroot()
+        #width = int(root.attrib.get("width"))
+        #height = int(root.attrib.get("height"))
+        #villagers = int(root.attrib.get("villagers"))
+
+        self.dataStore = Data.DataStore.DataStore('init.xml')#width,height,villagers)        
         for key, value in self.dataStore.EnvTiles.iteritems():
             (x,y) = self.dataStore.TileIdConverter.Convert1dTo2d(key)
             tileControl = TileControl(value, self)
@@ -64,6 +71,8 @@ class Application(Frame):
         self.refresh()
 
     def refresh(self):
+        if not self.alive:
+            return
         for control in self.tileControls:
             control.refresh()
 
@@ -75,8 +84,14 @@ class Application(Frame):
         t = Timer(.1, self.refresh)
         t.start()
 
+    def onClose(self):
+        self.dataStore.EndSim()
+        self.alive = False
+        time.sleep(0.2)
+        self.master.destroy()
+
 root = Tk()
 app = Application(master=root)
+root.protocol("WM_DELETE_WINDOW", app.onClose)
 app.mainloop()
-root.destroy()
 

@@ -13,7 +13,7 @@ class NeedAnalyzer(Actor):
         Actor.__init__(self, dataStore)
 
     def run(self):
-        while True:
+        while not self.stop_requested:
             self.AnalyzeFood()
             time.sleep(10)            
 

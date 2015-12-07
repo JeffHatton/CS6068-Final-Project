@@ -5,7 +5,8 @@ class TileGenerator(object):
     """description of class"""
 
     @staticmethod
-    def generateTileGrid(dimX, dimY):
+    def generateTileGrid(dimX, dimY, seed=None):
+        random.seed(seed)
         listOfTiles = list()
         for x in range(dimX):
             for y in range(dimY):
@@ -24,7 +25,7 @@ class TileGenerator(object):
                     tile.ResourceType = "Water"
                 elif randInt == 4:
                     tile.ResourceType = "Iron"
-                    #tile.Walkable = False
+                    tile.Walkable = False
 
                 listOfTiles.append(tile)
         return listOfTiles
