@@ -28,4 +28,5 @@ class TileGenerator(object):
                     tile.ResourceType = "Iron"                    
 
                 listOfTiles.append(tile)
+                random.seed(None)
         return listOfTiles
