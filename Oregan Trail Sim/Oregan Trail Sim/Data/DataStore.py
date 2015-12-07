@@ -1,5 +1,6 @@
 ﻿import Ids.IdConverter
 import threading
+import Tkinter
 import Villlages.Village
 import Villlages.Buildings
 import Villlages.Buildings.StockPile
@@ -29,6 +30,8 @@ class DataStore(object):
         self.MiscLock = threading.Lock()
         self.Logger = Logger(2)
         self.OtherActors = dict()
+        self.TimeScaling = Tkinter.StringVar()
+        self.TimeScaling.set("5")
         self.HousingAvilable = 0 
         self.ProspectiveHousing = 0
         self.StockPiles = 0
