@@ -31,6 +31,8 @@ class DataStore(object):
         self.OtherActors = dict()
         self.HousingAvilable = 0 
         self.ProspectiveHousing = 0
+        self.StockPiles = 0
+        self.ProspectiveStockPiles = 0
         for tile in TileGenerator.generateTileGrid(x, y, seed):
             tile.ID.LocalId = self.TileIdConverter.Convert2dTo1d(tile.ID.IdX,tile.ID.IdY)
             self.AddTile(tile)
@@ -45,6 +47,7 @@ class DataStore(object):
             if self.EnvTiles[id].ResourceType == "None":
                 self.EnvTiles[id].Structure = Villlages.Buildings.StockPile.StockPile(self, self.EnvTiles[id])
                 self.Village.addNeed(VillageRequest("Build:{0}".format(id), 0), 2)
+                self.addProspectiveStockPile()
                 break
         needActor = NeedAnalyzer(self)
         self.OtherActors[needActor.ID.GUID] = needActor
@@ -58,6 +61,17 @@ class DataStore(object):
     def addProspective(self, amount):
         self.MiscLock.acquire()
         self.ProspectiveHousing += amount
+        self.MiscLock.release()
+
+    def addProspectiveStockPile(self):
+        self.MiscLock.acquire()
+        self.ProspectiveStockPiles += 1
+        self.MiscLock.release()
+
+    def addStockPile(self):
+        self.MiscLock.acquire()
+        self.StockPiles += 1
+        self.StockPiles -= 1
         self.MiscLock.release()
 
     def AddActor(self, actor):

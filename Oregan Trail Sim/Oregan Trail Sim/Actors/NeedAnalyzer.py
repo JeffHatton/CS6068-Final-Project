@@ -17,6 +17,7 @@ class NeedAnalyzer(Actor):
         self.AverageHunger = 0
         self.TotalConsumption = 1
         self.Counter = 0
+        self.StoragePerStockPile = 200
         Actor.__init__(self, dataStore)
 
     def run(self):
@@ -28,6 +29,7 @@ class NeedAnalyzer(Actor):
             #    self.AnalyzeMoreHouses()
 
             self.Counter += 1
+            self.AnalyzeStockPiles()
             time.sleep(10)            
 
     def AnalyzeMoreHouses(self):
@@ -69,3 +71,17 @@ class NeedAnalyzer(Actor):
             self.DataStore.Village.addNeed(VillageRequest("Gather:Food", 0), int(math.ceil(diffFoods / self.FoodPerWorkerNeededNeeded)))
         self.AverageHunger = averageHunger / len(self.DataStore.EnvActors)
         self.TotalConsumption = averageConsumption
+
+    def AnalyzeStockPiles(self):
+        totalResources = 0
+        for res in self.DataStore.Village.Resources.keys():
+            totalResources += self.DataStore.Village.Resources[res]
+        
+        if totalResources > (self.DataStore.StockPiles + self.DataStore.ProspectiveStockPiles) * self.StoragePerStockPile:
+            while True:
+                id = random.randint(0, (self.DataStore.EnvironmentDimX * self.DataStore.EnvironmentDimY)-1)
+                if self.DataStore.EnvTiles[id].ResourceType == "None":
+                    self.DataStore.EnvTiles[id].Structure = Villlages.Buildings.StockPile.StockPile(self.DataStore, self.DataStore.EnvTiles[id])
+                    self.DataStore.Village.addNeed(VillageRequest("Build:{0}".format(id), 0), 2)
+                    self.DataStore.addProspectiveStockPile()
+                    break

@@ -8,3 +8,6 @@ class StockPile(Building):
         self.WokersRequiredToBuild = 2;
         self.TimeToBuild = 10
         self.BuildingType = "StockPile"
+
+    def BuildingFinished(self):
+        self.DataStore.addStockPile()
