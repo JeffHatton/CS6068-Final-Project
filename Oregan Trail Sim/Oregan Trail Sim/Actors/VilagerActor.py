@@ -11,11 +11,12 @@ class VilagerActor(LivingActor):
 
         gather = random.randint(0,2)
         self.PreferedAction = "Gather"
-        self.gatherRandomResource()                                    
+        self.gatherRandomResource()                             
+        self.self.ThreadSleepTime = 0       
 
     def run(self):        
         while not self.stop_requested:                
-            threadSleepTime = random.randint(1000, 1000) / 1000
+            self.ThreadSleepTime = random.randint(1000, 1000) / 1000
 
             # Check if Villager is alive
             self.StatusCheck()
@@ -42,8 +43,8 @@ class VilagerActor(LivingActor):
             elif self.CurrentTask == "Mate":
                 self.HandleMate()
 
-            self.DataStore.Logger.addToLog("Sleeping for {0}".format(threadSleepTime), 5)
-            time.sleep(threadSleepTime)
+            self.DataStore.Logger.addToLog("Sleeping for {0}".format(self.ThreadSleepTime), 5)
+            time.sleep(self.ThreadSleepTime)
 
     def GatherFromTile(self):
         self.DataStore.Logger.addToLog(("Attempting to gather from {0} Tile").format(self.CurrentTile.ResourceType), 4)
@@ -72,8 +73,8 @@ class VilagerActor(LivingActor):
         if len(self.CurrentMovePath) > 0:
             movePoint = self.CurrentMovePath.pop(0)
             self.MoveTo(self.DataStore.EnvTiles[movePoint])                        
-            threadSleepTime = 1 / self.MoveSpeed
-            self.DataStore.Logger.addToLog(("Moving to {0} wating {1} s before moving again").format(movePoint, threadSleepTime), 4)
+            self.ThreadSleepTime = 1 / self.MoveSpeed
+            self.DataStore.Logger.addToLog(("Moving to {0} wating {1} s before moving again").format(movePoint, self.ThreadSleepTime), 4)
         return len(self.CurrentMovePath)
 
     def HandleBuildTask(self):
@@ -103,6 +104,7 @@ class VilagerActor(LivingActor):
                 self.DataStore.Logger.addToLog(("Reached Dest {0} start gathering").format(self.CurrentTile.ID.LocalId), 5)
         elif self.CurrentAction == "Gather":
             self.GatherFromTile()
+            self.ThreadSleepTime = self.CurrentTile.GatherTime
             if self.CurrentInvCount == self.CarryLimit:
                 self.CurrentTask = "Deposit"
             elif self.DataStore.Village.VillageHasNeeds():

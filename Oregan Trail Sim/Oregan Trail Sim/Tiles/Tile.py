@@ -11,7 +11,7 @@ class Tile(threading.Thread):
         self.Structure = None
         self.ResourceType = "None"
         self.GatherAmountGiven = 5
-        self.GatherTime = 0
+        self.GatherTime = .5
         self.Walkable = True
 
     def AddActor(self, actor):
