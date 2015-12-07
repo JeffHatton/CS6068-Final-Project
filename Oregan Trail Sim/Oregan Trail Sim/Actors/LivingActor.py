@@ -2,7 +2,8 @@
 from Data.DataStore import *
 import math
 import time
-import timer
+from threading import Timer
+import heapq
 
 class LivingActor(Actor):
     """description of class"""
@@ -50,37 +51,67 @@ class LivingActor(Actor):
         self.hungerChecker()
         Thread.start(self)
 
-    def determinePath(self, tileId):
+    def getSuccessors(self, Node):
+        (path, (X,Y)) = Node
+        result = []
+        idEast = self.DataStore.TileIdConverter.Convert2dTo1d(X + 1, Y)
+        idWest = self.DataStore.TileIdConverter.Convert2dTo1d(X - 1, Y)
+        idNorth = self.DataStore.TileIdConverter.Convert2dTo1d(X, Y + 1)
+        idSouth = self.DataStore.TileIdConverter.Convert2dTo1d(X, Y - 1)
+
+        idNorthEast = self.DataStore.TileIdConverter.Convert2dTo1d(X + 1, Y + 1)
+        idNorthWest = self.DataStore.TileIdConverter.Convert2dTo1d(X - 1, Y + 1)
+        idSouthEast = self.DataStore.TileIdConverter.Convert2dTo1d(X + 1, Y - 1)
+        idSouthWest = self.DataStore.TileIdConverter.Convert2dTo1d(X - 1, Y - 1)
+
+        if idEast >= 0 and self.DataStore.EnvTiles[idEast].Walkable:
+            result.append((path + [self.DataStore.TileIdConverter.Convert2dTo1d(X+1,Y)], (X+1, Y)))
+        if idWest >= 0 and self.DataStore.EnvTiles[idWest].Walkable:
+            result.append((path + [self.DataStore.TileIdConverter.Convert2dTo1d(X-1,Y)], (X-1, Y)))
+        if idNorth >= 0 and self.DataStore.EnvTiles[idNorth].Walkable:
+            result.append((path + [self.DataStore.TileIdConverter.Convert2dTo1d(X,Y+1)], (X, Y+1)))
+        if idSouth >= 0 and self.DataStore.EnvTiles[idSouth].Walkable:
+            result.append((path + [self.DataStore.TileIdConverter.Convert2dTo1d(X,Y-1)], (X, Y-1)))
+        
+        if idNorthEast >= 0 and self.DataStore.EnvTiles[idNorthEast].Walkable:
+            result.append((path + [self.DataStore.TileIdConverter.Convert2dTo1d(X+1,Y+1)], (X+1, Y+1)))
+        if idNorthWest >= 0 and self.DataStore.EnvTiles[idNorthWest].Walkable:
+            result.append((path + [self.DataStore.TileIdConverter.Convert2dTo1d(X-1,Y+1)], (X-1, Y+1)))
+        if idSouthEast >= 0 and self.DataStore.EnvTiles[idSouthEast].Walkable:
+            result.append((path + [self.DataStore.TileIdConverter.Convert2dTo1d(X+1,Y-1)], (X+1, Y-1)))
+        if idSouthWest >= 0 and self.DataStore.EnvTiles[idSouthWest].Walkable:
+            result.append((path + [self.DataStore.TileIdConverter.Convert2dTo1d(X-1,Y-1)], (X-1, Y-1)))
+        
+        return result
+
+    def goalHeuristic(self, Node, Destination):
+        (path, (Cx, Cy)) = Node
+        (Dx, Dy) = Destination
+        return math.sqrt(pow(Cx - Dx, 2) + pow(Cy - Dy, 2));
+
+    # TODO: Basic, but functional.
+    def aStarPathSearch(self, tileId):
         (desX, desY) = self.DataStore.TileIdConverter.Convert1dTo2d(tileId)
         (curX, curY) = self.DataStore.TileIdConverter.Convert1dTo2d(self.CurrentTile.ID.LocalId)
-        
-        path = list()
-        self.DataStore.Logger.addToLog("{0} Attempting to find path to {1}".format(self.ID.GUID, (desX, desY)), 5)
-        while curX != desX or curY != desY:            
-            if curX < desX:
-                id = self.DataStore.TileIdConverter.Convert2dTo1d(curX + 1, curY)
-                if id >= 0:
-                    if self.DataStore.EnvTiles[id].Walkable:
-                        curX = curX + 1
-            elif curX > desX:
-                id = self.DataStore.TileIdConverter.Convert2dTo1d(curX - 1, curY)
-                if id >= 0:
-                    if self.DataStore.EnvTiles[self.DataStore.TileIdConverter.Convert2dTo1d(curX - 1, curY)].Walkable:
-                        curX = curX - 1
-            if curY < desY:
-                id = self.DataStore.TileIdConverter.Convert2dTo1d(curX, curY + 1)
-                if id >= 0:
-                    if self.DataStore.EnvTiles[self.DataStore.TileIdConverter.Convert2dTo1d(curX, curY + 1)].Walkable:
-                        curY = curY + 1
-            elif curY > desY:
-                id = self.DataStore.TileIdConverter.Convert2dTo1d(curX, curY - 1)
-                if id >= 0:
-                    if self.DataStore.EnvTiles[self.DataStore.TileIdConverter.Convert2dTo1d(curX, curY - 1)].Walkable:
-                        curY = curY - 1           
 
-            path.append(self.DataStore.TileIdConverter.Convert2dTo1d(curX,curY))
-            self.DataStore.Logger.addToLog("{0} Adding {1} to path {2} --- {3} ---- {4}".format(self.ID.GUID, self.DataStore.TileIdConverter.Convert2dTo1d(curX,curY), (curX, curY), (desX, desY), self.DataStore.TileIdConverter.Convert1dTo2d(tileId)),5)
-        return path
+        frontier = []
+        heapq.heappush( frontier, (self.goalHeuristic(([], (curX, curY)), (desX, desY)), ([], (curX, curY))) )
+        explored = {}
+        while len(frontier) > 0:
+            (priority, curNode) = heapq.heappop(frontier)
+            if str(curNode[1]) in explored:
+                continue
+            explored[str(curNode[1])] = 1
+            for testnode in self.getSuccessors(curNode):
+                if testnode[1][0] == desX and testnode[1][1] == desY:
+                    return testnode[0]
+                if str(testnode[1]) in explored:
+                    continue
+                heapq.heappush(frontier, (len(testnode[0]) + self.goalHeuristic(testnode, (desX,desY)), testnode))
+        return []
+
+    def determinePath(self, tileId):
+        return self.aStarPathSearch(tileId)
 
     def depositResouce(self, resourceType):
         #path to store house

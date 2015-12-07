@@ -13,6 +13,7 @@ class Actor(Thread):
         self.ID = Ids.Id.Id(True)
         self.CurrentAction = "Idle"
         self.CurrentTask = "Idle"
+        self.stop_requested = False
 
     def run(self):        
         return

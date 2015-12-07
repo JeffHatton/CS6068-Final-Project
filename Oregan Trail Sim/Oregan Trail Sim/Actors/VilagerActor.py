@@ -14,7 +14,7 @@ class VilagerActor(LivingActor):
         self.gatherRandomResource()                                    
 
     def run(self):        
-        while True:                
+        while not self.stop_requested:                
             threadSleepTime = random.randint(1000, 1000) / 1000
 
             # Check if Villager is alive
@@ -22,7 +22,8 @@ class VilagerActor(LivingActor):
             if self.Status == "Dead":
                 self.CurrentTile.RemoveActor(self)
                 self.DataStore.Logger.addToLog("Villager {0} has died.".format(self.ID.GUID), 0)
-                del self.DataStore.EnvActors[self.ID.GUID]
+                #del self.DataStore.EnvActors[self.ID.GUID]
+                self.DataStore.RemoveActor(self.ID.GUID)
                 return
                                                
             if self.Hunger >= self.CriticalFoodLimit:
