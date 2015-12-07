@@ -45,8 +45,8 @@ class VilagerActor(LivingActor):
             elif self.CurrentTask == "Mate":
                 self.HandleMate()
 
-            self.DataStore.Logger.addToLog("Sleeping for {0}".format(self.ThreadSleepTime), 5)
-            time.sleep(self.ThreadSleepTime)
+            #self.DataStore.Logger.addToLog("Sleeping for {0}".format(self.ThreadSleepTime * float(self.DataStore.TimeScaling.get())), 5)
+            time.sleep(self.ThreadSleepTime / (float(self.DataStore.TimeScaling.get()) / 10))
 
     def GatherFromTile(self):
         self.DataStore.Logger.addToLog(("Attempting to gather from {0} Tile").format(self.CurrentTile.ResourceType), 4)

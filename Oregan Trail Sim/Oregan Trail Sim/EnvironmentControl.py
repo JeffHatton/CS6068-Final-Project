@@ -1,4 +1,4 @@
-import Actors.Actor
+﻿import Actors.Actor
 import Data.DataStore
 import Actors.VilagerActor
 import Tiles.Tile

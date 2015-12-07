@@ -172,7 +172,7 @@ class LivingActor(Actor):
             self.DataStore.Logger.addToLog("Actor {0} Auto Hunger {1} Task {2}".format(self.ID.GUID, self.Hunger, self.CurrentTask), 5)
         else:
             self.LastTime = time.time()
-        t = Timer(1, self.hungerChecker)
+        t = Timer(1  / (float(self.DataStore.TimeScaling.get()) / 10), self.hungerChecker)
         t.start()
 
     def AddInventory(self, resourceType, amount):

@@ -22,47 +22,36 @@ class DataStore(object):
         x = self.x
         y = self.y
         seed = root.find("TileGenerator").text
-
         self.EnvActors = dict()
         self.EnvTiles = dict()
         self.SetEnvironmentDim(x, y)
         self.ActorLock = threading.Lock()
         self.EnvLock = threading.Lock()
         self.Village = Villlages.Village.Village(self)              
-        self.VillageCenter = (x * y) / 50
         self.MiscLock = threading.Lock()
         self.Logger = Logger(0)
         self.OtherActors = dict()
         self.TimeScaling = Tkinter.StringVar()
-        self.TimeScaling.set("5")
+        self.TimeScaling.set("1")
         self.HousingAvilable = 0 
         self.NumBuildings = 0
         self.ProspectiveHousing = 0
         self.StockPiles = 0
         self.ProspectiveStockPiles = 0
         self.refineMap = {"Food" : "FoodProcessor", "PIron": "IronProcessor" , "PStone":"StoneProcessor"}
+
         for tile in TileGenerator.generateTileGrid(x, y, seed):
             tile.ID.LocalId = self.TileIdConverter.Convert2dTo1d(tile.ID.IdX,tile.ID.IdY)
             self.AddTile(tile)
 
+        self.VillageCenter = self.TileIdConverter.Convert2dTo1d(x /2, y / 2)
+        self.VillageCenter = self.getBuildingPoint()
+
         numVillagers = int(root.attrib.get("villagers"))
         for idx in range(numVillagers):
-            actor = VilagerActor(self, self.EnvTiles[x /2 + (y/2*x)])
+            actor = VilagerActor(self, self.EnvTiles[self.VillageCenter])
             self.AddActor(actor)
 
-        while True:
-            id = random.randint(0, (x * y) -1)
-            if self.EnvTiles[id].ResourceType == "None":
-                self.EnvTiles[id].Structure = Villlages.Buildings.StockPile.StockPile(self, self.EnvTiles[id])
-                self.Village.addNeed(VillageRequest("Build:{0}".format(id), 0), 2)
-                break
-
-        #while True:
-        #    id = random.randint(0, (x * y) -1)
-        #    if self.EnvTiles[id].ResourceType == "None":
-        #        self.EnvTiles[id].Structure = Villlages.Buildings.StockPile.StockPile(self, self.EnvTiles[id])
-        #        self.Village.addNeed(VillageRequest("Build:{0}".format(id), 0), 2)
-        #        break
         needActor = NeedAnalyzer(self)
         self.OtherActors[needActor.ID.GUID] = needActor
         needActor.start()
@@ -202,7 +191,7 @@ class DataStore(object):
         else:
             range = int( max(4, math.log(self.NumBuildings, 2)))
         while True:
-            if count > range * range:
+            if count > range * range * range:
                 range += 1
             
             x = random.randint(0, range)

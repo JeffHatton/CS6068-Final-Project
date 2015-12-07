@@ -67,7 +67,7 @@ class Building(object):
                 self.RemoveActor(actor)
 
             return
-        t = Timer(.5, self.Build)
+        t = Timer(.5  / (float(self.DataStore.TimeScaling.get()) / 10), self.Build)
         t.start()
 
     def Work(self):
@@ -86,7 +86,7 @@ class Building(object):
             for actor in self.Wokers.values():
                 self.RemoveActor(actor)
             return
-        t = Timer(.5, self.Work)
+        t = Timer(.5  /( float(self.DataStore.TimeScaling.get()) / 10), self.Work)
         t.start()
 
     def WorkFinished(self):
@@ -110,7 +110,7 @@ class Building(object):
                 self.Work()
                 return
 
-        t = Timer(.25, self.waitForResources)
+        t = Timer(.25  / (float(self.DataStore.TimeScaling.get()) / 10), self.waitForResources)
         t.start()
 
     def WorkDone(self):

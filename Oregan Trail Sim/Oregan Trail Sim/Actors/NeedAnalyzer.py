@@ -28,13 +28,14 @@ class NeedAnalyzer(Actor):
             self.AnalyzeFood()
             self.AnalyzeMoreVillagers()
             self.idleProduction()
+            self.MoreStockPiles()
             if self.Counter % 3 == 0:
                 self.AnalyzeMoreHouses()
 
 
             self.Counter += 1
-            self.AnalyzeStockPiles()
-            time.sleep(10)            
+            #self.AnalyzeStockPiles()
+            time.sleep(.5 / (float(self.DataStore.TimeScaling.get()) / 10))            
 
     def MoreStockPiles(self):
         if len(self.DataStore.findAllIdleReadBuildings("StockPile", self.DataStore.DoesBuildingExist)) < len(self.DataStore.EnvActors) / 10:
