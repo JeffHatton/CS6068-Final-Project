@@ -32,8 +32,7 @@ class DataStore(object):
         self.MiscLock = threading.Lock()
         self.Logger = Logger(0)
         self.OtherActors = dict()
-        self.TimeScaling = Tkinter.StringVar()
-        self.TimeScaling.set("10")
+        self.TimeScaling = 100000000000
         self.HousingAvilable = 0
         self.NumBuildings = 0
         self.ProspectiveHousing = 0
@@ -131,7 +130,7 @@ class DataStore(object):
             actor.stop_requested = True
         for key,actor in self.OtherActors.iteritems():
             actor.stop_requested = True
-        self.Logger.saveToFile()
+        #self.Logger.saveToFile()
 
     def AddBuilding(self, amount):
         self.MiscLock.acquire()

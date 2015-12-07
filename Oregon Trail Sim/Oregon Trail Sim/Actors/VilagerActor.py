@@ -10,11 +10,11 @@ class VilagerActor(LivingActor):
         LivingActor.__init__(self, dataStore, tile)
 
         gather = random.randint(0,2)
-        self.PreferedAction = "Gather"                 
-        self.ThreadSleepTime = 0       
+        self.PreferedAction = "Gather"
+        self.ThreadSleepTime = 0
 
-    def run(self):        
-        while not self.stop_requested:                
+    def run(self):
+        while not self.stop_requested:
             self.ThreadSleepTime = random.randint(1000, 1000) / 1000
 
             # Check if Villager is alive
@@ -24,20 +24,20 @@ class VilagerActor(LivingActor):
                 self.DataStore.Logger.addToLog("Villager {0} has died.".format(self.ID.GUID), 0)
                 self.DataStore.RemoveActor(self.ID.GUID)
                 return
-                                               
+
             if self.Hunger >= self.CriticalFoodLimit:
                 self.CurrentTask = "GetFood"
                 self.DataStore.Logger.addToLog("Actor {0} Critical Food Limit".format(self.ID.GUID), 0)
 
             self.DataStore.Logger.addToLog("Actor {0} doing Task {1} with Action {2}".format(self.ID.GUID, self.CurrentTask, self.CurrentAction), 5)
-            if self.CurrentTask.startswith("Build:"):          
-                self.HandleBuildTask()                           
-            if self.CurrentTask.startswith("Gather:"):      
-                self.HandleGatherTask()                                         
-            if self.CurrentTask.startswith("Refine:"):      
-                self.handleRefine()                    
+            if self.CurrentTask.startswith("Build:"):
+                self.HandleBuildTask()
+            if self.CurrentTask.startswith("Gather:"):
+                self.HandleGatherTask()
+            if self.CurrentTask.startswith("Refine:"):
+                self.handleRefine()
             elif self.CurrentTask == "Idle":
-                self.HandleIdleTask()                
+                self.HandleIdleTask()
             elif self.CurrentTask == "GetFood":
                 self.HandleGetFoodTask()
             elif self.CurrentTask == "Deposit":
@@ -45,24 +45,24 @@ class VilagerActor(LivingActor):
             elif self.CurrentTask == "Mate":
                 self.HandleMate()
 
-            #self.DataStore.Logger.addToLog("Sleeping for {0}".format(self.ThreadSleepTime * float(self.DataStore.TimeScaling.get())), 5)
-            time.sleep(self.ThreadSleepTime / (float(self.DataStore.TimeScaling.get()) / 10))
+            #self.DataStore.Logger.addToLog("Sleeping for {0}".format(self.ThreadSleepTime * float(self.DataStore.TimeScaling)), 5)
+            time.sleep(self.ThreadSleepTime / (float(self.DataStore.TimeScaling) / 10))
 
     def GatherFromTile(self):
         self.DataStore.Logger.addToLog(("Attempting to gather from {0} Tile").format(self.CurrentTile.ResourceType), 4)
         if self.CurrentTile.ResourceType != "None":
             self.AddInventory(self.CurrentTile.ResourceType, self.CurrentTile.GatherAmountGiven)
-            
-    def findNearestResourceTile(self, resourceType):        
+
+    def findNearestResourceTile(self, resourceType):
         return self.searchTiles(resourceType, lambda tile, searchValue: tile.ResourceType == searchValue)
 
     def moveToRandomTile(self):
-        continueLoop = True       
+        continueLoop = True
         while continueLoop:
-            tileId = random.randint(0,99)                
+            tileId = random.randint(0,99)
             self.DataStore.Logger.addToLog(("Trying to move to {0} Tile Type: {1} From {2}").format(tileId, self.DataStore.EnvTiles[tileId].ResourceType, self.CurrentTile.ID.LocalId), 4)
-            if self.DataStore.EnvTiles[tileId].Walkable:                                       
-                self.CurrentMovePath = self.determinePath(tileId)                                
+            if self.DataStore.EnvTiles[tileId].Walkable:
+                self.CurrentMovePath = self.determinePath(tileId)
                 self.DataStore.Logger.addToLog(("Taking path {0}").format(self.CurrentMovePath) , 4)
                 self.CurrentAction = "Moving"
                 continueLoop = False
@@ -74,7 +74,7 @@ class VilagerActor(LivingActor):
     def Move(self):
         if len(self.CurrentMovePath) > 0:
             movePoint = self.CurrentMovePath.pop(0)
-            self.MoveTo(self.DataStore.EnvTiles[movePoint])                        
+            self.MoveTo(self.DataStore.EnvTiles[movePoint])
             self.ThreadSleepTime = 1 / self.MoveSpeed
             self.DataStore.Logger.addToLog(("Moving to {0} wating {1} s before moving again").format(movePoint, self.ThreadSleepTime), 4)
         return len(self.CurrentMovePath)
@@ -82,14 +82,14 @@ class VilagerActor(LivingActor):
     def HandleBuildTask(self):
         if self.CurrentAction == "Idle":
             id = self.CurrentTask[6:]
-            self.CurrentMovePath = self.determinePath(int(id))                                
+            self.CurrentMovePath = self.determinePath(int(id))
             self.DataStore.Logger.addToLog(("Taking path {0}").format(self.CurrentMovePath),2)
             self.CurrentAction = "Moving"
         if self.CurrentAction == "Moving":
             if self.Move() == 0:
                 self.CurrentAction = "Build"
                 self.DataStore.Logger.addToLog(("Reached Dest {0} start Building").format(self.CurrentTile.ID.LocalId), 3)
-                self.CurrentTile.Structure.AddActor(self)                        
+                self.CurrentTile.Structure.AddActor(self)
         if self.CurrentAction == "Build":
             self.AllowHungerToIncrease = False
             if self.CurrentTile.Structure.PercentBuilt == 100:
@@ -145,7 +145,7 @@ class VilagerActor(LivingActor):
         if self.CurrentAction == "Deposit":
             if self.CurrentTile.Structure.BuildingType == "StockPile":
                 self.depositAllResources()
-                self.idleWork()            
+                self.idleWork()
             else:
                 self.CurrentAction = "Idle"
 
@@ -158,7 +158,7 @@ class VilagerActor(LivingActor):
         for searchDistance in range(1,self.DataStore.x):
             for x in range(-searchDistance, searchDistance):
                 id = self.DataStore.TileIdConverter.Convert2dTo1d(self.CurrentTile.ID.IdX + x, self.CurrentTile.ID.IdY + searchDistance)
-                if id >= 0:                    
+                if id >= 0:
                     if  searchFunction(self.DataStore.EnvTiles[id], searchValue):
                         return id
                 id = self.DataStore.TileIdConverter.Convert2dTo1d(self.CurrentTile.ID.IdX + x, self.CurrentTile.ID.IdY -searchDistance)
@@ -171,14 +171,14 @@ class VilagerActor(LivingActor):
                     if searchFunction(self.DataStore.EnvTiles[id], searchValue):
                         return id
                 id = self.DataStore.TileIdConverter.Convert2dTo1d(self.CurrentTile.ID.IdX -searchDistance, self.CurrentTile.ID.IdY + y)
-                if id >= 0:                   
+                if id >= 0:
                     if searchFunction(self.DataStore.EnvTiles[id], searchValue):
                         return id
         return tileId
 
     def findPath(self, id):
         self.DataStore.Logger.addToLog(("Trying to move to {0} Tile Type: {1} From {2}").format(id, self.DataStore.EnvTiles[id].ResourceType, self.CurrentTile.ID.LocalId), 5)
-        self.CurrentMovePath = self.determinePath(id)                                
+        self.CurrentMovePath = self.determinePath(id)
         self.DataStore.Logger.addToLog(("Taking path {0}").format(self.CurrentMovePath),5)
         self.CurrentAction = "Moving"
 
@@ -192,15 +192,15 @@ class VilagerActor(LivingActor):
             if tileId >= 0:
                 self.findPath(tileId)
         if self.CurrentAction == "Moving":
-            if self.Move() == 0:                
+            if self.Move() == 0:
                 if self.CurrentTile.Structure.WorkInProgress:
-                    self.CurrentAction = "Idle"                    
-                else:                    
+                    self.CurrentAction = "Idle"
+                else:
                     self.CurrentAction = "Mate"
-                    self.CurrentTile.Structure.AddActor(self)    
+                    self.CurrentTile.Structure.AddActor(self)
         if self.CurrentAction == "Mate":
             self.AllowHungerToIncrease = False
-            self.DataStore.Logger.addToLog("Actor {1} Mating: {0}".format(self.CurrentTile.Structure.WorkFin, self.ID.GUID),5)                           
+            self.DataStore.Logger.addToLog("Actor {1} Mating: {0}".format(self.CurrentTile.Structure.WorkFin, self.ID.GUID),5)
             if self.CurrentTile.Structure.WorkFin:
                 self.DataStore.Logger.addToLog("Done Actor {1} Mating: {0}".format(self.CurrentTile.Structure.WorkFin, self.ID.GUID),5)
                 self.AllowHungerToIncrease = True
@@ -218,12 +218,12 @@ class VilagerActor(LivingActor):
             if tileId >= 0:
                 self.findPath(tileId)
         if self.CurrentAction == "Moving":
-            if self.Move() == 0:                
+            if self.Move() == 0:
                 if self.CurrentTile.Structure.WorkInProgress:
-                    self.CurrentAction = "Idle"                    
-                else:                    
+                    self.CurrentAction = "Idle"
+                else:
                     self.CurrentAction = "Work"
-                    self.CurrentTile.Structure.AddActor(self)    
+                    self.CurrentTile.Structure.AddActor(self)
         if self.CurrentAction == "Work":
             self.AllowHungerToIncrease = False
             if self.CurrentTile.Structure.WorkFin:

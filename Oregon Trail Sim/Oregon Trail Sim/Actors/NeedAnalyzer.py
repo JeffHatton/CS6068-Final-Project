@@ -35,7 +35,7 @@ class NeedAnalyzer(Actor):
 
             self.Counter += 1
             #self.AnalyzeStockPiles()
-            time.sleep(.5 / (float(self.DataStore.TimeScaling.get()) / 10))            
+            time.sleep(.5 / (float(self.DataStore.TimeScaling) / 10))            
 
     def MoreStockPiles(self):
         if len(self.DataStore.findAllIdleReadBuildings("StockPile", self.DataStore.DoesBuildingExist)) < len(self.DataStore.EnvActors) / 10:
@@ -54,7 +54,7 @@ class NeedAnalyzer(Actor):
                 self.DataStore.AddBuilding(1)
                 self.DataStore.addProspective(5)
 
-    def AnalyzeMoreVillagers(self):        
+    def AnalyzeMoreVillagers(self):
         if self.AverageHungerLimitForMore > self.AverageHunger and len(self.DataStore.EnvActors) + 1 <= self.DataStore.HousingAvilable:
             if self.DataStore.Village.Resources["Food"] / self.TotalConsumption > self.StoreLimitForMore:
                 self.DataStore.Village.addWant(VillageRequest("Mate", 1), 2)
@@ -78,9 +78,9 @@ class NeedAnalyzer(Actor):
             totalFoodNeeded += actor.Hunger / actor.FoodToHungerConversion
             averageFoodHunger += actor.FoodToHungerConversion
             averageConsumption += actor.HungerDisRate
-        diffFoods = (self.FoodStockPilePreference * totalFoodNeeded) - self.DataStore.Village.Resources["Food"] 
+        diffFoods = (self.FoodStockPilePreference * totalFoodNeeded) - self.DataStore.Village.Resources["Food"]
         if diffFoods > 0:
-            workersNeeded = int(math.ceil(diffFoods / self.FoodPerWorkerNeededNeeded))            
+            workersNeeded = int(math.ceil(diffFoods / self.FoodPerWorkerNeededNeeded))
             idx = self.DataStore.findIdle("FoodProcessor")
 
             if idx == -1:
@@ -93,7 +93,7 @@ class NeedAnalyzer(Actor):
                 for x in range(0,len(count)):
                     self.DataStore.Village.addNeed(VillageRequest("Refine:Food", 0), len(count))
                 self.DataStore.Village.addNeed(VillageRequest("Gather:Food", 0), workersNeeded - len(count))
-      
+
         self.AverageHunger = averageHunger / len(self.DataStore.EnvActors)
         self.TotalConsumption = averageConsumption
 
@@ -101,7 +101,7 @@ class NeedAnalyzer(Actor):
         totalResources = 0
         for res in self.DataStore.Village.Resources.keys():
             totalResources += self.DataStore.Village.Resources[res]
-        
+
         if totalResources > (self.DataStore.StockPiles + self.DataStore.ProspectiveStockPiles) * self.StoragePerStockPile:
             while True:
                 id = random.randint(0, (self.DataStore.EnvironmentDimX * self.DataStore.EnvironmentDimY)-1)

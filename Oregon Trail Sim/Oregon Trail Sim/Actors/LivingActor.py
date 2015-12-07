@@ -7,7 +7,7 @@ import heapq
 
 class LivingActor(Actor):
     """description of class"""
-    
+
     def __init__(self, dataStore, tile):
         Actor.__init__(self, dataStore)
         self.CurrentTile = tile
@@ -15,10 +15,10 @@ class LivingActor(Actor):
         self.HP = 0
         self.CarryLimit = 25
         self.CurrentInvCount = 0;
-        self.Inventory = dict()      
+        self.Inventory = dict()
         for resource in dataStore.AllResources():
             self.Inventory[resource] = 0
-              
+
         self.HungerLock = threading.Lock()
         self.CriticalFoodLimit = 150
         self.AllowHungerToIncrease = True
@@ -38,11 +38,11 @@ class LivingActor(Actor):
 
         # Tiles/s
         self.MoveSpeed = 1
-        
+
         self.CurrentMovePath = list()
 
         # Conversion factor for food to hunger
-        self.FoodToHungerConversion = 5        
+        self.FoodToHungerConversion = 5
 
     def MoveTo(self, Tile):
         self.CurrentTile.RemoveActor(self)
@@ -76,7 +76,7 @@ class LivingActor(Actor):
             result.append((path + [self.DataStore.TileIdConverter.Convert2dTo1d(X,Y+1)], (X, Y+1)))
         if idSouth >= 0 and self.DataStore.EnvTiles[idSouth].Walkable:
             result.append((path + [self.DataStore.TileIdConverter.Convert2dTo1d(X,Y-1)], (X, Y-1)))
-        
+
         if idNorthEast >= 0 and self.DataStore.EnvTiles[idNorthEast].Walkable:
             result.append((path + [self.DataStore.TileIdConverter.Convert2dTo1d(X+1,Y+1)], (X+1, Y+1)))
         if idNorthWest >= 0 and self.DataStore.EnvTiles[idNorthWest].Walkable:
@@ -85,7 +85,7 @@ class LivingActor(Actor):
             result.append((path + [self.DataStore.TileIdConverter.Convert2dTo1d(X+1,Y-1)], (X+1, Y-1)))
         if idSouthWest >= 0 and self.DataStore.EnvTiles[idSouthWest].Walkable:
             result.append((path + [self.DataStore.TileIdConverter.Convert2dTo1d(X-1,Y-1)], (X-1, Y-1)))
-        
+
         return result
 
     def goalHeuristic(self, Node, Destination):
@@ -120,7 +120,7 @@ class LivingActor(Actor):
     def depositResouce(self, resourceType):
         #path to store house
         if resourceType in self.Inventory.keys():
-            if self.Inventory[resourceType] > 0:                
+            if self.Inventory[resourceType] > 0:
                 self.DataStore.Village.addResource([(resourceType, self.Inventory[resourceType])])
                 self.AddInventory(resourceType, -self.Inventory[resourceType])
 
@@ -152,7 +152,7 @@ class LivingActor(Actor):
         self.HungerLock.release()
         self.AddInventory("Food", -self.Inventory["Food"])
         self.CurrentTask = "Idle"
-    
+
     def StatusCheck(self):
         if self.Hunger > self.HungerLimit:
             self.Status = "Dead"
@@ -160,7 +160,7 @@ class LivingActor(Actor):
 
     def hungerChecker(self):
         if self.Status == "Dead":
-            return 
+            return
 
         if self.AllowHungerToIncrease:
             timenow = time.time()
@@ -172,7 +172,7 @@ class LivingActor(Actor):
             self.DataStore.Logger.addToLog("Actor {0} Auto Hunger {1} Task {2}".format(self.ID.GUID, self.Hunger, self.CurrentTask), 5)
         else:
             self.LastTime = time.time()
-        t = Timer(1  / (float(self.DataStore.TimeScaling.get()) / 10), self.hungerChecker)
+        t = Timer(1  / (float(self.DataStore.TimeScaling) / 10), self.hungerChecker)
         t.start()
 
     def AddInventory(self, resourceType, amount):

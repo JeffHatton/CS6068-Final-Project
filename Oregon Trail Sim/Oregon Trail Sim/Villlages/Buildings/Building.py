@@ -32,19 +32,19 @@ class Building(object):
 
     def AddActor(self, actor):
         self.Lock.acquire()
-        self.Wokers[actor.ID.GUID] = actor        
+        self.Wokers[actor.ID.GUID] = actor
 
         self.DataStore.addFresh(self.Tile)
         self.DataStore.Logger.addToLog("Actor {0} added to Building {1}, length {2} Tile-{3}".format(actor.ID.GUID, self.BuildingType, len(self.Wokers), self.Tile.ID.LocalId), 0)
         self.LastTime = time.time()
         if len(self.Wokers) == self.WokersRequiredToBuild and not self.Built:
-            self.Lock.release()            
-            self.waitForResources()            
-            return 
+            self.Lock.release()
+            self.waitForResources()
+            return
         elif len(self.Wokers) == self.VillagersRequiredToWork:
             self.Lock.release()
-            self.waitForResources()            
-            return 
+            self.waitForResources()
+            return
         self.Lock.release()
 
     def RemoveActor(self, actor):
@@ -70,7 +70,7 @@ class Building(object):
             self.DataStore.addFresh(self.Tile)
 
             return
-        t = Timer(.5  / (float(self.DataStore.TimeScaling.get()) / 10), self.Build)
+        t = Timer(.5  / (float(self.DataStore.TimeScaling) / 10), self.Build)
         t.start()
 
     def Work(self):
@@ -90,10 +90,10 @@ class Building(object):
             self.Wokers.clear()
             self.DataStore.addFresh(self.Tile)
             return
-        t = Timer(.5  /( float(self.DataStore.TimeScaling.get()) / 10), self.Work)
+        t = Timer(.5  /( float(self.DataStore.TimeScaling) / 10), self.Work)
         t.start()
 
-    def WorkFinished(self):        
+    def WorkFinished(self):
         for resource, value in self.WorkResourceProduce.iteritems():
             if value > 0:
                 self.DataStore.Village.addResource([(resource, value)])
@@ -106,15 +106,15 @@ class Building(object):
         if not self.Built:
             if self.DataStore.Village.requestResources(self.ResouceCost):
                 self.LastTime = time.time()
-                self.Build()        
+                self.Build()
                 return
         else:
-            if self.DataStore.Village.requestResources(self.WorkResourceCost):            
+            if self.DataStore.Village.requestResources(self.WorkResourceCost):
                 self.WorkFin = False
                 self.Work()
                 return
 
-        t = Timer(.25  / (float(self.DataStore.TimeScaling.get()) / 10), self.waitForResources)
+        t = Timer(.25  / (float(self.DataStore.TimeScaling) / 10), self.waitForResources)
         t.start()
 
     def WorkDone(self):
