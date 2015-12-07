@@ -59,8 +59,8 @@
     <InterpreterReference Include="{fcc291aa-427c-498c-a4d7-4502d6449b8c}\2.7" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Oregan Trail Sim\Oregan Trail Sim.pyproj">
-      <Name>Oregan Trail Sim</Name>
+    <ProjectReference Include="..\Oregon Trail Sim\Oregon Trail Sim.pyproj">
+      <Name>Oregon Trail Sim</Name>
       <Project>{8e38f714-5d7c-4923-ac18-636aaa27167b}</Project>
       <Private>True</Private>
     </ProjectReference>

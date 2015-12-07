@@ -5,13 +5,13 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>8e38f714-5d7c-4923-ac18-636aaa27167b</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>Oregan_Trail_Sim.py</StartupFile>
+    <StartupFile>Oregon_Trail_Sim.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
-    <Name>Oregan Trail Sim</Name>
-    <RootNamespace>Oregan Trail Sim</RootNamespace>
+    <Name>Oregon Trail Sim</Name>
+    <RootNamespace>Oregon Trail Sim</RootNamespace>
     <InterpreterId>{9a7a9026-48c1-4688-9d5d-e5699d47d074}</InterpreterId>
     <InterpreterVersion>2.7</InterpreterVersion>
     <IsWindowsApplication>False</IsWindowsApplication>
@@ -67,7 +67,7 @@
     <Compile Include="Logger\__init__.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Oregan_Trail_Sim.py" />
+    <Compile Include="Oregon_Trail_Sim.py" />
     <Compile Include="Pathing\Pather.py">
       <SubType>Code</SubType>
     </Compile>
