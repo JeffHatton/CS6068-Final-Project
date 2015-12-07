@@ -16,7 +16,7 @@ class Application(Frame):
         self.lblTimeScaling.grid(row=0, column=0,columnspan = 1)
         self.entrTimeScaling = Entry(self, textvariable=self.dataStore.TimeScaling)
         self.entrTimeScaling.grid(row=0, column=1,columnspan = 1)
-        self.EnvControl = EnvironmentControl(self)
+        self.EnvControl = EnvironmentControl(self.dataStore, self)
         self.EnvControl.grid(row=1, column=0)
         
     def __init__(self, master=None):

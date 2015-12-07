@@ -34,6 +34,7 @@ class Building(object):
         self.Lock.acquire()
         self.Wokers[actor.ID.GUID] = actor        
 
+        self.DataStore.addFresh(self.Tile)
         self.DataStore.Logger.addToLog("Actor {0} added to Building {1}, length {2} Tile-{3}".format(actor.ID.GUID, self.BuildingType, len(self.Wokers), self.Tile.ID.LocalId), 0)
         self.LastTime = time.time()
         if len(self.Wokers) == self.WokersRequiredToBuild and not self.Built:
@@ -50,6 +51,7 @@ class Building(object):
         self.Lock.acquire()
         del self.Wokers[actor.ID.GUID]
         self.DataStore.Logger.addToLog("Actor {0} removed to Building {1}, length {2}".format(actor.ID.GUID, self.BuildingType, len(self.Wokers)), 0)
+        self.DataStore.addFresh(self.Tile)
         self.Lock.release()
 
     def Build(self):
@@ -58,13 +60,14 @@ class Building(object):
         self.LastTime = timenow
 
         self.PercentBuilt += diff / self.TimeToBuild * 100
-
+        self.DataStore.addFresh(self.Tile)
         if self.PercentBuilt >= 100:
             self.PercentBuilt = 100
             self.Built = True
             self.BuildingFinished()
-            for actor in self.Wokers.values():
-                self.RemoveActor(actor)
+            self.DataStore.addFresh(self.Tile)
+            self.Wokers.clear()
+            self.DataStore.addFresh(self.Tile)
 
             return
         t = Timer(.5  / (float(self.DataStore.TimeScaling.get()) / 10), self.Build)
@@ -77,19 +80,20 @@ class Building(object):
         self.LastTime = timenow
 
         self.PercentWorked += diff / self.WorkTime * 100
-
+        self.DataStore.addFresh(self.Tile)
         if self.PercentWorked >= 100:
             self.PercentWorked = 0
             self.WorkFin = True
             self.WorkInProgress = False
             self.WorkFinished()
-            for actor in self.Wokers.values():
-                self.RemoveActor(actor)
+            self.DataStore.addFresh(self.Tile)
+            self.Wokers.clear()
+            self.DataStore.addFresh(self.Tile)
             return
         t = Timer(.5  /( float(self.DataStore.TimeScaling.get()) / 10), self.Work)
         t.start()
 
-    def WorkFinished(self):
+    def WorkFinished(self):        
         for resource, value in self.WorkResourceProduce.iteritems():
             if value > 0:
                 self.DataStore.Village.addResource([(resource, value)])

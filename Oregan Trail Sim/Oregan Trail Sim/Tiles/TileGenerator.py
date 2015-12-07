@@ -5,13 +5,13 @@ class TileGenerator(object):
     """description of class"""
 
     @staticmethod
-    def generateTileGrid(dimX, dimY, seed=None):
+    def generateTileGrid(dimX, dimY, dataStore, seed=None):
         random.seed(seed)
         listOfTiles = list()
         for x in range(dimX):
             for y in range(dimY):
                 randInt = random.randint(0,12)
-                tile = Tile.Tile()
+                tile = Tile.Tile(dataStore)
                 tile.ID.IdX = x
                 tile.ID.IdY = y
                

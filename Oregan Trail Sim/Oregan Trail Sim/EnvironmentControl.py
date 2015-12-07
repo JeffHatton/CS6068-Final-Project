@@ -47,12 +47,13 @@ class EnvironmentControl(Frame):
         self.lblLivingValue["text"] = "0"
         self.lblLivingValue.grid(row=0, column=9)
         
-    def __init__(self, master=None):
+    def __init__(self, dataStore, master=None):
         Frame.__init__(self, master)
         self.pack()
         self.createWidgets()
         self.tileControls = list()
         self.alive = True
+        self.dataStore = dataStore
 
         #tree = ET.parse('init.xml')
         #root = tree.getroot()
@@ -70,8 +71,15 @@ class EnvironmentControl(Frame):
     def refresh(self):
         if not self.alive:
             return
-        for control in self.tileControls:
-            control.refresh()
+
+        list = self.dataStore.getAndClearRefresh()
+
+        while len(list) > 0:
+            self.tileControls[list.pop().ID.LocalId].refresh()
+
+
+        #for control in self.tileControls:
+        #    control.refresh()
 
         self.lblWoodValue["text"] = self.dataStore.Village.Resources["Wood"]
         self.lblFoodValue["text"] = self.dataStore.Village.Resources["Food"]

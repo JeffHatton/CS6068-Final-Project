@@ -10,6 +10,7 @@ from Tiles.TileGenerator import *
 from Actors.VilagerActor import *
 from Logger.Logger import *
 from Actors.NeedAnalyzer import *
+import collections
 
 class DataStore(object):
     """Global Storage for Application"""
@@ -32,15 +33,17 @@ class DataStore(object):
         self.Logger = Logger(0)
         self.OtherActors = dict()
         self.TimeScaling = Tkinter.StringVar()
-        self.TimeScaling.set("1")
+        self.TimeScaling.set("10")
         self.HousingAvilable = 0 
         self.NumBuildings = 0
         self.ProspectiveHousing = 0
         self.StockPiles = 0
         self.ProspectiveStockPiles = 0
         self.refineMap = {"Food" : "FoodProcessor", "PIron": "IronProcessor" , "PStone":"StoneProcessor"}
+        self.RefreshQue = collections.deque()
+        self.RefreshQueLock = Lock()
 
-        for tile in TileGenerator.generateTileGrid(x, y, seed):
+        for tile in TileGenerator.generateTileGrid(x, y, self, seed):
             tile.ID.LocalId = self.TileIdConverter.Convert2dTo1d(tile.ID.IdX,tile.ID.IdY)
             self.AddTile(tile)
 
@@ -202,3 +205,16 @@ class DataStore(object):
                 if self.EnvTiles[id].ResourceType == "None" and self.EnvTiles[id].Structure == None:
                     return id
                 count +=1
+
+    def addFresh(self, tile):
+        self.RefreshQueLock.acquire()
+        self.RefreshQue.append(tile)
+        self.RefreshQueLock.release()
+
+    def getAndClearRefresh(self):
+        self.RefreshQueLock.acquire()
+        list = collections.deque(self.RefreshQue)
+        self.RefreshQue.clear()
+        self.RefreshQueLock.release()
+
+        return list
