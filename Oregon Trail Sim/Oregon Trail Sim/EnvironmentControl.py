@@ -46,7 +46,7 @@ class EnvironmentControl(Frame):
         self.lblLivingValue = Label(self)
         self.lblLivingValue["text"] = "0"
         self.lblLivingValue.grid(row=0, column=9)
-        
+
     def __init__(self, dataStore, master=None):
         Frame.__init__(self, master)
         self.pack()
@@ -86,5 +86,6 @@ class EnvironmentControl(Frame):
         self.lblStoneValue["text"] = self.dataStore.Village.Resources["Stone"]
         self.lblIronValue["text"] = self.dataStore.Village.Resources["Iron"]
         self.lblLivingValue["text"] = len(self.dataStore.EnvActors)
-        t = Timer(.1, self.refresh)
-        t.start()
+        #t = Timer(.1, self.refresh)
+        #t.start()
+        self.master.after(200, self.refresh)

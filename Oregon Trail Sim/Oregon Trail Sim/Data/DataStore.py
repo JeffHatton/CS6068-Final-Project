@@ -28,13 +28,13 @@ class DataStore(object):
         self.SetEnvironmentDim(x, y)
         self.ActorLock = threading.Lock()
         self.EnvLock = threading.Lock()
-        self.Village = Villlages.Village.Village(self)              
+        self.Village = Villlages.Village.Village(self)
         self.MiscLock = threading.Lock()
         self.Logger = Logger(0)
         self.OtherActors = dict()
         self.TimeScaling = Tkinter.StringVar()
         self.TimeScaling.set("10")
-        self.HousingAvilable = 0 
+        self.HousingAvilable = 0
         self.NumBuildings = 0
         self.ProspectiveHousing = 0
         self.StockPiles = 0
@@ -90,7 +90,7 @@ class DataStore(object):
         if actor != None:
             del self.EnvActors[id]
             actor.stop_requested = True
-    
+
     def MorpthActor(self, id, newActorType):
         print("Implement morpth actor")
 
@@ -101,7 +101,7 @@ class DataStore(object):
 
     def RemoveTile(self, id):
         print("Implement remove Tile")
-    
+
     def MorpthTile(self, id, newTileType):
         print("Implement morpth Tile")
 
@@ -145,7 +145,7 @@ class DataStore(object):
         for searchDistance in range(0,self.x):
             for x in range(-searchDistance, searchDistance):
                 id = self.TileIdConverter.Convert2dTo1d(self.x / 2 + x, self.y / 2 + searchDistance)
-                if id >= 0:                    
+                if id >= 0:
                     if  searchFunction(self.EnvTiles[id], searchValue):
                         return id
                 id = self.TileIdConverter.Convert2dTo1d(self.x / 2 + x, self.y / 2 -searchDistance)
@@ -158,7 +158,7 @@ class DataStore(object):
                     if searchFunction(self.EnvTiles[id], searchValue):
                         return id
                 id = self.TileIdConverter.Convert2dTo1d(self.x / 2 -searchDistance, self.y / 2 + y)
-                if id >= 0:                   
+                if id >= 0:
                     if searchFunction(self.EnvTiles[id], searchValue):
                         return id
         return tileId
@@ -196,7 +196,7 @@ class DataStore(object):
         while True:
             if count > range * range * range:
                 range += 1
-            
+
             x = random.randint(0, range)
             y = random.randint(0, range)
             (curX, curY) = self.TileIdConverter.Convert1dTo2d(self.VillageCenter)
@@ -208,7 +208,8 @@ class DataStore(object):
 
     def addFresh(self, tile):
         self.RefreshQueLock.acquire()
-        self.RefreshQue.append(tile)
+        if tile not in self.RefreshQue:
+            self.RefreshQue.append(tile)
         self.RefreshQueLock.release()
 
     def getAndClearRefresh(self):
