@@ -23,9 +23,9 @@ class TileGenerator(object):
                     tile.ResourceType = "Stone"
                 elif randInt == 3:
                     tile.ResourceType = "Water"
-                elif randInt == 4:
-                    tile.ResourceType = "Iron"
                     tile.Walkable = False
+                elif randInt == 4:
+                    tile.ResourceType = "Iron"                    
 
                 listOfTiles.append(tile)
         return listOfTiles
