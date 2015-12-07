@@ -26,11 +26,11 @@ class DataStore(object):
         self.ActorLock = threading.Lock()
         self.EnvLock = threading.Lock()
         self.Village = Villlages.Village.Village(self)              
+        self.MiscLock = threading.Lock()
         self.Logger = Logger(3)
         self.OtherActors = dict()
-        needActor = NeedAnalyzer(self)
-        self.OtherActors[needActor.ID.GUID] = needActor
-        needActor.start()
+        self.HousingAvilable = 0 
+        self.ProspectiveHousing = 0
         for tile in TileGenerator.generateTileGrid(x, y, seed):
             tile.ID.LocalId = self.TileIdConverter.Convert2dTo1d(tile.ID.IdX,tile.ID.IdY)
             self.AddTile(tile)
@@ -38,7 +38,6 @@ class DataStore(object):
         numVillagers = int(root.attrib.get("villagers"))
         for idx in range(numVillagers):
             actor = VilagerActor(self, self.EnvTiles[x /2 + y/2])
-            #actor.CurrentTask = "Gather"
             self.AddActor(actor)
 
         while True:
@@ -48,6 +47,19 @@ class DataStore(object):
                 self.Village.addNeeds([VillageRequest("Build:{0}".format(id), 0)])
                 self.Village.addNeeds([VillageRequest("Build:{0}".format(id), 0)])
                 break
+        needActor = NeedAnalyzer(self)
+        self.OtherActors[needActor.ID.GUID] = needActor
+        needActor.start()
+
+    def addHousing(self, amount):
+        self.MiscLock.acquire()
+        self.HousingAvilable += amount
+        self.MiscLock.release()
+
+    def addProspective(self, amount):
+        self.MiscLock.acquire()
+        self.ProspectiveHousing += amount
+        self.MiscLock.release()
 
     def AddActor(self, actor):
         self.ActorLock.acquire()

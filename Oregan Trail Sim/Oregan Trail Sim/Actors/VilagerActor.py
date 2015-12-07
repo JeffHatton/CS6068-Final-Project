@@ -22,14 +22,13 @@ class VilagerActor(LivingActor):
             if self.Status == "Dead":
                 self.CurrentTile.RemoveActor(self)
                 self.DataStore.Logger.addToLog("Villager {0} has died.".format(self.ID.GUID), 0)
-                #del self.DataStore.EnvActors[self.ID.GUID]
                 self.DataStore.RemoveActor(self.ID.GUID)
                 return
                                                
             if self.Hunger >= self.CriticalFoodLimit:
                 self.CurrentTask = "GetFood"
 
-            self.DataStore.Logger.addToLog("Actor {0} doing Task {1} with Action {2}".format(self.ID.GUID, self.CurrentTask, self.CurrentAction), 3)
+            self.DataStore.Logger.addToLog("Actor {0} doing Task {1} with Action {2}".format(self.ID.GUID, self.CurrentTask, self.CurrentAction), 1)
             if self.CurrentTask.startswith("Build:"):          
                 self.HandleBuildTask()                           
             if self.CurrentTask.startswith("Gather:"):      
@@ -40,6 +39,8 @@ class VilagerActor(LivingActor):
                 self.HandleGetFoodTask()
             elif self.CurrentTask == "Deposit":
                 self.HandleDepositResources()
+            elif self.CurrentTask == "Mate":
+                self.HandleMate()
 
             self.DataStore.Logger.addToLog("Sleeping for {0}".format(threadSleepTime), 5)
             time.sleep(threadSleepTime)
@@ -51,41 +52,6 @@ class VilagerActor(LivingActor):
             
     def findNearestResourceTile(self, resourceType):        
         return self.searchTiles(resourceType, lambda tile, searchValue: tile.ResourceType == searchValue)
-        #tileId = -1
-        #self.DataStore.Logger.addToLog(("Trying to find {0} Tile").format(resourceType), 4)
-        #for searchDistance in range(1,10):
-        #    for x in range(-searchDistance, searchDistance):
-        #        id = self.DataStore.TileIdConverter.Convert2dTo1d(self.CurrentTile.ID.IdX + x, self.CurrentTile.ID.IdY + searchDistance)
-        #        if id >= 0:
-        #            self.DataStore.Logger.addToLog(("Examining {0} Type: {1}").format(id, self.DataStore.EnvTiles[id].ResourceType), 8)
-        #            if self.DataStore.EnvTiles[id].ResourceType == resourceType:
-        #                return id
-        #                tileId = id
-        #                break;
-        #        id = self.DataStore.TileIdConverter.Convert2dTo1d(self.CurrentTile.ID.IdX + x, self.CurrentTile.ID.IdY -searchDistance)
-        #        if id >= 0:
-        #            self.DataStore.Logger.addToLog(("Examining {0} Type: {1}").format(id, self.DataStore.EnvTiles[id].ResourceType), 8)
-        #            if self.DataStore.EnvTiles[id].ResourceType == resourceType:
-        #                return id
-        #                tileId = id
-        #                break;
-        #    for y in range(-searchDistance, searchDistance):
-        #        id = self.DataStore.TileIdConverter.Convert2dTo1d(self.CurrentTile.ID.IdX + searchDistance, self.CurrentTile.ID.IdY + y)
-        #        if id >= 0:
-        #            self.DataStore.Logger.addToLog(("Examining {0} Type: {1}").format(id, self.DataStore.EnvTiles[id].ResourceType), 8)
-        #            if self.DataStore.EnvTiles[id].ResourceType == resourceType:
-        #                return id
-        #                tileId = id
-        #                break;
-        #        id = self.DataStore.TileIdConverter.Convert2dTo1d(self.CurrentTile.ID.IdX -searchDistance, self.CurrentTile.ID.IdY + y)
-        #        if id >= 0:
-        #            self.DataStore.Logger.addToLog(("Examining {0} Type: {1}").format(id, self.DataStore.EnvTiles[id].ResourceType), 8)
-        #            if self.DataStore.EnvTiles[id].ResourceType == resourceType:
-        #                return id
-        #                tileId = id
-        #                break;
-        #self.DataStore.Logger.addToLog(("Found Tile {0}").format(tileId), 4)
-        #return tileId
 
     def moveToRandomTile(self):
         continueLoop = True       
@@ -176,6 +142,7 @@ class VilagerActor(LivingActor):
                 self.idleWork()            
             else:
                 self.CurrentAction = "Idle"
+
     def searchTiles(self, searchValue, searchFunction):
         tileId = -1
 
@@ -213,3 +180,26 @@ class VilagerActor(LivingActor):
     def idleWork(self):
         self.CurrentTask = "Idle"
         self.CurrentAction = "Idle"
+
+    def HandleMate(self):
+        if self.CurrentAction == "Idle":
+            tileId = self.searchTiles("House", self.findIdleBuilding)
+            if tileId >= 0:
+                self.findPath(tileId)
+        if self.CurrentAction == "Moving":
+            if self.Move() == 0:
+                self.CurrentTile.Structure.AddActor(self)    
+                if self.CurrentTile.Structure.WorkInProgress:
+                    self.CurrentAction = "Idle"
+                else:                    
+                    self.CurrentAction = "Mate"
+        if self.CurrentAction == "Mate":
+            self.DataStore.Logger.addToLog("Mating",0)                           
+            if self.CurrentTile.Structure.WorkFin:
+                self.idleWork()
+
+    def findIdleBuilding(self, tile, buildingType):
+        if tile.Structure != None:
+            if tile.Structure.BuildingType == buildingType and not tile.Structure.WorkInProgress:
+                return True
+        return False

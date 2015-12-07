@@ -18,7 +18,8 @@ class LivingActor(Actor):
         self.Inventory = dict()        
         self.HungerLock = threading.Lock()
         self.CriticalFoodLimit = 90
-        self.FoodGetLimit = 50
+        self.AllowHungerToIncrease = True
+        self.FoodGetLimit = 30
 
         # Status of the actor
         self.Status = "Healthy"
@@ -155,13 +156,16 @@ class LivingActor(Actor):
             return
 
     def hungerChecker(self):
-        timenow = time.time()
-        diff = timenow - self.LastTime
-        self.LastTime = timenow
-        self.HungerLock.acquire()
-        self.Hunger += diff * self.HungerDisRate
-        self.HungerLock.release()
-        self.DataStore.Logger.addToLog("Actor {0} Auto Hunger {1} Task {2}".format(self.ID.GUID, self.Hunger, self.CurrentTask), 5)
+        if self.AllowHungerToIncrease:
+            timenow = time.time()
+            diff = timenow - self.LastTime
+            self.LastTime = timenow
+            self.HungerLock.acquire()
+            self.Hunger += diff * self.HungerDisRate
+            self.HungerLock.release()
+            self.DataStore.Logger.addToLog("Actor {0} Auto Hunger {1} Task {2}".format(self.ID.GUID, self.Hunger, self.CurrentTask), 5)
+        else:
+            self.LastTime = time.time()
         t = Timer(1, self.hungerChecker)
         t.start()
 

@@ -1,4 +1,5 @@
 ﻿from threading import *
+from Villlages.VillageRequest import *
 import math
 import random
 import Data.DataStore
@@ -31,9 +32,20 @@ class Village(object):
 
         self.ResourceLock.release()
 
-    def requestResources(self, resourceChanges):
+    def requestResources(self, resourceChanges, allOrNothing = True):
+        self.ResourceLock.acquire()
+        haveAllResources = True
         for resourceType, changeValue in resourceChanges.iteritems():
-            self.requestResource(resourceType, changeValue)
+            if self.Resources[resourceType] < changeValue:
+                haveAllResources = False
+                self.addNeeds(VillageRequest("Gather:" + resourceType, 1))
+        
+        if haveAllResources:
+            for resourceType, changeValue in resourceChanges.iteritems():
+                self.Resources[resourceType] -= changeValue     
+        self.ResourceLock.release()    
+
+        return haveAllResources
 
     def requestResource(self, resourceType, amount, allOrNothing = True):
         self.ResourceLock.acquire()        
@@ -67,6 +79,7 @@ class Village(object):
         self.WantsNeedsLock.acquire()
         for need in wants:
             self.Wants.append(need)
+            self.DataStore.Logger.addToLog("Work Want Added: {0}".format(need.ActionNeeded), 2)
         self.Wants = sorted(self.Wants, key =  lambda need: need.Priority)
         self.WantsNeedsLock.release()
 
@@ -78,7 +91,7 @@ class Village(object):
             self.WantsNeedsLock.release()
             return need.ActionNeeded
         elif len(self.Wants) > 0:
-            want = self.Needs.pop(0)
+            want = self.Wants.pop(0)
             self.DataStore.Logger.addToLog("Work Want Given: {0}".format(want.ActionNeeded), 2)
             self.WantsNeedsLock.release()
             return want.ActionNeeded
