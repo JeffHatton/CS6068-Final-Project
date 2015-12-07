@@ -1,5 +1,6 @@
 ﻿import Ids.IdConverter
 import threading
+import Tkinter
 import Villlages.Village
 import Villlages.Buildings
 import Villlages.Buildings.StockPile
@@ -28,6 +29,8 @@ class DataStore(object):
         self.Village = Villlages.Village.Village(self)              
         self.Logger = Logger(3)
         self.OtherActors = dict()
+        self.TimeScaling = Tkinter.StringVar()
+        self.TimeScaling.set("5")
         needActor = NeedAnalyzer(self)
         self.OtherActors[needActor.ID.GUID] = needActor
         needActor.start()
