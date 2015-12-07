@@ -144,7 +144,7 @@ class LivingActor(Actor):
 
     def eat(self):
         self.HungerLock.acquire()
-        self.DataStore.Logger.addToLog("Actor {0} Old Hunger {1}".format(self.ID.GUID, self.Hunger), 0)
+        self.DataStore.Logger.addToLog("Actor {0} Old Hunger {1}".format(self.ID.GUID, self.Hunger), 6)
         self.Hunger -=  self.Inventory["Food"] * self.FoodToHungerConversion
         if self.Hunger < 0:
             self.Hunger = 0

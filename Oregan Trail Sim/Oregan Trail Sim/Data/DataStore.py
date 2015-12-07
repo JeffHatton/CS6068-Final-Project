@@ -67,7 +67,7 @@ class DataStore(object):
 
     def RemoveActor(self, id):
         actor = self.EnvActors.get(id, None)
-        if actore != None:
+        if actor != None:
             del self.EnvActors[id]
             actor.stop_requested = True
     

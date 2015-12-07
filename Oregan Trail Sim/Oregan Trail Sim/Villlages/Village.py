@@ -103,12 +103,12 @@ class Village(object):
         self.WantsNeedsLock.acquire()
         if len(self.Needs) > 0:            
             need = self.Needs.pop(0)
-            self.DataStore.Logger.addToLog("Work Need Given: {0}".format(need.ActionNeeded), 2)
+            self.DataStore.Logger.addToLog("Work Need Given: {0}".format(need.ActionNeeded), 9)
             self.WantsNeedsLock.release()
             return need.ActionNeeded
         elif len(self.Wants) > 0:
             want = self.Wants.pop(0)
-            self.DataStore.Logger.addToLog("Work Want Given: {0}".format(want.ActionNeeded), 2)
+            self.DataStore.Logger.addToLog("Work Want Given: {0}".format(want.ActionNeeded), 9)
             self.WantsNeedsLock.release()
             return want.ActionNeeded
         else:

@@ -34,8 +34,10 @@ class Building(object):
         self.Lock.acquire()
         self.Wokers[actor.ID.GUID] = actor        
 
+        self.DataStore.Logger.addToLog("Actor {0} added to Building {1}, length {2} Tile-{3}".format(actor.ID.GUID, self.BuildingType, len(self.Wokers), self.Tile.ID.LocalId), 0)
+        self.LastTime = time.time()
         if len(self.Wokers) == self.WokersRequiredToBuild and not self.Built:
-            self.Lock.release()
+            self.Lock.release()            
             self.waitForResources()            
             return 
         elif len(self.Wokers) == self.VillagersRequiredToWork:
@@ -47,6 +49,7 @@ class Building(object):
     def RemoveActor(self, actor):
         self.Lock.acquire()
         del self.Wokers[actor.ID.GUID]
+        self.DataStore.Logger.addToLog("Actor {0} removed to Building {1}, length {2}".format(actor.ID.GUID, self.BuildingType, len(self.Wokers)), 0)
         self.Lock.release()
 
     def Build(self):
@@ -106,3 +109,6 @@ class Building(object):
 
         t = Timer(.25, self.waitForResources)
         t.start()
+
+    def WorkDone(self):
+        return self.WorkFin and self.PercentWorked == 0 and not self.WorkInProgress

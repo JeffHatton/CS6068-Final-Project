@@ -28,8 +28,9 @@ class VilagerActor(LivingActor):
                                                
             if self.Hunger >= self.CriticalFoodLimit:
                 self.CurrentTask = "GetFood"
+                self.DataStore.Logger.addToLog("Actor {0} Critical Food Limit".format(self.ID.GUID), 0)
 
-            self.DataStore.Logger.addToLog("Actor {0} doing Task {1} with Action {2}".format(self.ID.GUID, self.CurrentTask, self.CurrentAction), 1)
+            self.DataStore.Logger.addToLog("Actor {0} doing Task {1} with Action {2}".format(self.ID.GUID, self.CurrentTask, self.CurrentAction), 5)
             if self.CurrentTask.startswith("Build:"):          
                 self.HandleBuildTask()                           
             if self.CurrentTask.startswith("Gather:"):      
@@ -81,7 +82,7 @@ class VilagerActor(LivingActor):
         if self.CurrentAction == "Idle":
             id = self.CurrentTask[6:]
             self.CurrentMovePath = self.determinePath(int(id))                                
-            self.DataStore.Logger.addToLog(("Taking path {0}").format(self.CurrentMovePath),2)
+            self.DataStore.Logger.addToLog(("Taking path {0}").format(self.CurrentMovePath),5)
             self.CurrentAction = "Moving"
         if self.CurrentAction == "Moving":
             if self.Move() == 0:
@@ -95,7 +96,7 @@ class VilagerActor(LivingActor):
     def HandleGatherTask(self):
         if self.CurrentAction == "Idle":
             id = self.findNearestResourceTile(self.CurrentTask[7:])
-            self.DataStore.Logger.addToLog(("Tile {0}").format(id), 2)
+            self.DataStore.Logger.addToLog(("Tile {0}").format(id), 6)
             if id > -1:
                 self.findPath(id)
         elif self.CurrentAction == "Moving":
@@ -189,15 +190,18 @@ class VilagerActor(LivingActor):
             if tileId >= 0:
                 self.findPath(tileId)
         if self.CurrentAction == "Moving":
-            if self.Move() == 0:
-                self.CurrentTile.Structure.AddActor(self)    
+            if self.Move() == 0:                
                 if self.CurrentTile.Structure.WorkInProgress:
-                    self.CurrentAction = "Idle"
+                    self.CurrentAction = "Idle"                    
                 else:                    
                     self.CurrentAction = "Mate"
+                    self.CurrentTile.Structure.AddActor(self)    
         if self.CurrentAction == "Mate":
-            self.DataStore.Logger.addToLog("Mating",0)                           
+            self.AllowHungerToIncrease = False
+            self.DataStore.Logger.addToLog("Actor {1} Mating: {0}".format(self.CurrentTile.Structure.WorkFin, self.ID.GUID),5)                           
             if self.CurrentTile.Structure.WorkFin:
+                self.DataStore.Logger.addToLog("Done Actor {1} Mating: {0}".format(self.CurrentTile.Structure.WorkFin, self.ID.GUID),5)
+                self.AllowHungerToIncrease = True
                 self.idleWork()
 
     def findIdleBuilding(self, tile, buildingType):
