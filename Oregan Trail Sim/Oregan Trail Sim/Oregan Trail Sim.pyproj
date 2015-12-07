@@ -92,6 +92,9 @@
     <Compile Include="Villlages\Buildings\Building.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Villlages\Buildings\House.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Villlages\Buildings\StockPile.py">
       <SubType>Code</SubType>
     </Compile>

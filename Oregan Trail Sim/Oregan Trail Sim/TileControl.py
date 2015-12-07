@@ -14,8 +14,10 @@ class TileControl(Frame):
 
         self.lblCount = Label(self)
         self.lblCount.pack({"side": "left"})       
-        self.buildingControl = BuildingControl(self.Tile.Structure, self)
-        self.buildingControl.pack({"side": "left"})       
+        self.buildingControl = None
+        if self.Tile.Structure != None:
+            self.buildingControl = BuildingControl(self.Tile.Structure, self)
+            self.buildingControl.pack({"side": "left"})
 
     def __init__(self, tile, master=None):
         Frame.__init__(self, master)
@@ -27,7 +29,13 @@ class TileControl(Frame):
     def refresh(self):
         self.lblCount["text"] = self.Tile.GetActorCount()      
         self.lblCount["background"] = self.typeToColor(self.Tile.ResourceType)
-        self.buildingControl.refresh()
+
+        if self.Tile.Structure != None:
+            if self.buildingControl == None:
+                self.buildingControl = BuildingControl(self.Tile.Structure, self)
+                self.buildingControl.pack({"side": "left"})
+            else:
+                self.buildingControl.refresh()
 
     def typeToColor(self, type):
         if type == "Wood":
@@ -70,12 +78,17 @@ class BuildingControl(Frame):
             self.lblCount["text"] = int(self.Building.PercentBuilt)
             self.lblCount["background"] = "Yellow"
         else:
-            self.lblCount["text"] = ""
+            if self.Building.PercentWorked != 0:
+                self.lblCount["text"] = self.Building.PercentWorked
+            else:
+                self.lblCount["text"] = ""
             self.lblCount["background"] = self.typeToColor(self.Building.BuildingType)
 
     def typeToColor(self, type):
         if type == "StockPile":
             return "Brown"
+        elif type == "House":
+            return "Purple"
         else:
             return "White"
 

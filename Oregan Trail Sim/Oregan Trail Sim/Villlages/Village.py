@@ -1,4 +1,5 @@
 ﻿from threading import *
+from Villlages.VillageRequest import *
 import math
 import random
 import Data.DataStore
@@ -31,9 +32,20 @@ class Village(object):
 
         self.ResourceLock.release()
 
-    def requestResources(self, resourceChanges):
+    def requestResources(self, resourceChanges, allOrNothing = True):
+        self.ResourceLock.acquire()
+        haveAllResources = True
         for resourceType, changeValue in resourceChanges.iteritems():
-            self.requestResource(resourceType, changeValue)
+            if self.Resources[resourceType] < changeValue:
+                haveAllResources = False
+                self.addNeed(VillageRequest("Gather:" + resourceType, 1), 2)
+        
+        if haveAllResources:
+            for resourceType, changeValue in resourceChanges.iteritems():
+                self.Resources[resourceType] -= changeValue     
+        self.ResourceLock.release()    
+
+        return haveAllResources
 
     def requestResource(self, resourceType, amount, allOrNothing = True):
         self.ResourceLock.acquire()        
@@ -54,19 +66,36 @@ class Village(object):
 
         self.ResourceLock.release()    
         return returnAmount    
-    
-    def addNeeds(self, Needs):
-        self.WantsNeedsLock.acquire()
-        for need in Needs:
-            self.Needs.append(need)
-            self.DataStore.Logger.addToLog("Work Need Added: {0}".format(need.ActionNeeded), 2)
+
+    def addNeed(self, Need, numberToAdd, overrite = True):
+        self.WantsNeedsLock.acquire()    
+
+        if overrite:
+            count = 0
+            for need in self.Needs:
+                if need.ActionNeeded == Need.ActionNeeded:
+                    count += 1
+            numberToAdd = max(0, numberToAdd - count)
+
+        for x in range(0, numberToAdd):
+            self.Needs.append(VillageRequest(Need.ActionNeeded, Need.Priority))
+
         self.Needs = sorted(self.Needs, key =  lambda need: need.Priority)
         self.WantsNeedsLock.release()
 
-    def addWants(self, wants):
-        self.WantsNeedsLock.acquire()
-        for need in wants:
-            self.Wants.append(need)
+    def addWant(self, want, numberToAdd, overrite = True):
+        self.WantsNeedsLock.acquire()    
+
+        if overrite:
+            count = 0
+            for need in self.Wants:
+                if need.ActionNeeded == want.ActionNeeded:
+                    count += 1
+            numberToAdd = max(0, numberToAdd - count)
+
+        for x in range(0, numberToAdd):
+            self.Wants.append(VillageRequest(want.ActionNeeded, want.Priority))
+
         self.Wants = sorted(self.Wants, key =  lambda need: need.Priority)
         self.WantsNeedsLock.release()
 
@@ -74,12 +103,12 @@ class Village(object):
         self.WantsNeedsLock.acquire()
         if len(self.Needs) > 0:            
             need = self.Needs.pop(0)
-            self.DataStore.Logger.addToLog("Work Need Given: {0}".format(need.ActionNeeded), 2)
+            self.DataStore.Logger.addToLog("Work Need Given: {0}".format(need.ActionNeeded), 9)
             self.WantsNeedsLock.release()
             return need.ActionNeeded
         elif len(self.Wants) > 0:
-            want = self.Needs.pop(0)
-            self.DataStore.Logger.addToLog("Work Want Given: {0}".format(want.ActionNeeded), 2)
+            want = self.Wants.pop(0)
+            self.DataStore.Logger.addToLog("Work Want Given: {0}".format(want.ActionNeeded), 9)
             self.WantsNeedsLock.release()
             return want.ActionNeeded
         else:

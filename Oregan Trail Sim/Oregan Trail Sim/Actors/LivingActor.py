@@ -15,10 +15,14 @@ class LivingActor(Actor):
         self.HP = 0
         self.CarryLimit = 25
         self.CurrentInvCount = 0;
-        self.Inventory = dict()        
+        self.Inventory = dict()      
+        for resource in dataStore.AllResources():
+            self.Inventory[resource] = 0
+              
         self.HungerLock = threading.Lock()
         self.CriticalFoodLimit = 90
-        self.FoodGetLimit = 50
+        self.AllowHungerToIncrease = True
+        self.FoodGetLimit = 30
 
         # Status of the actor
         self.Status = "Healthy"
@@ -140,7 +144,7 @@ class LivingActor(Actor):
 
     def eat(self):
         self.HungerLock.acquire()
-        self.DataStore.Logger.addToLog("Actor {0} Old Hunger {1}".format(self.ID.GUID, self.Hunger), 0)
+        self.DataStore.Logger.addToLog("Actor {0} Old Hunger {1}".format(self.ID.GUID, self.Hunger), 6)
         self.Hunger -=  self.Inventory["Food"] * self.FoodToHungerConversion
         if self.Hunger < 0:
             self.Hunger = 0
@@ -155,13 +159,16 @@ class LivingActor(Actor):
             return
 
     def hungerChecker(self):
-        timenow = time.time()
-        diff = timenow - self.LastTime
-        self.LastTime = timenow
-        self.HungerLock.acquire()
-        self.Hunger += diff * self.HungerDisRate
-        self.HungerLock.release()
-        self.DataStore.Logger.addToLog("Actor {0} Auto Hunger {1} Task {2}".format(self.ID.GUID, self.Hunger, self.CurrentTask), 5)
+        if self.AllowHungerToIncrease:
+            timenow = time.time()
+            diff = timenow - self.LastTime
+            self.LastTime = timenow
+            self.HungerLock.acquire()
+            self.Hunger += diff * self.HungerDisRate
+            self.HungerLock.release()
+            self.DataStore.Logger.addToLog("Actor {0} Auto Hunger {1} Task {2}".format(self.ID.GUID, self.Hunger, self.CurrentTask), 5)
+        else:
+            self.LastTime = time.time()
         t = Timer(1, self.hungerChecker)
         t.start()
 
