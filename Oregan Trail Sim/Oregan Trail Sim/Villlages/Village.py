@@ -16,7 +16,9 @@ class Village(object):
 
         for resource in dataStore.AllResources():
             self.Resources[resource] = 0
-        self.Resources["Wood"] = 100
+        self.Resources["Wood"] = 500
+        self.Resources["Stone"] = 500
+        self.Resources["Iron"] = 500
         self.DataStore = dataStore
         self.Needs = list()
         self.Wants = list()
@@ -24,7 +26,7 @@ class Village(object):
     def addResource(self, resourceChanges):
         self.ResourceLock.acquire()        
         for resourceType, changeValue in resourceChanges:
-            self.DataStore.Logger.addToLog("{0} {1} Collected".format(changeValue, resourceType), 4)
+            self.DataStore.Logger.addToLog("{0} {1} Collected".format(changeValue, resourceType), 1)
             if resourceType not in self.Resources.keys():
                 self.Resources[resourceType] = changeValue
             else:
@@ -38,7 +40,10 @@ class Village(object):
         for resourceType, changeValue in resourceChanges.iteritems():
             if self.Resources[resourceType] < changeValue:
                 haveAllResources = False
-                self.addNeed(VillageRequest("Gather:" + resourceType, 1), 2)
+                if resourceType in self.DataStore.processedResources():
+                    self.addWant(VillageRequest("Refine:" + resourceType, 1), 2)
+                else:
+                    self.addWant(VillageRequest("Gather:" + resourceType, 1), 2)
         
         if haveAllResources:
             for resourceType, changeValue in resourceChanges.iteritems():
@@ -69,6 +74,7 @@ class Village(object):
 
     def addNeed(self, Need, numberToAdd, overrite = True):
         self.WantsNeedsLock.acquire()    
+        self.DataStore.Logger.addToLog("{0} Need Added: {1}".format(numberToAdd, Need.ActionNeeded),5)
 
         if overrite:
             count = 0
@@ -85,7 +91,7 @@ class Village(object):
 
     def addWant(self, want, numberToAdd, overrite = True):
         self.WantsNeedsLock.acquire()    
-
+        self.DataStore.Logger.addToLog("{0} Want Added: {1}".format(numberToAdd, want.ActionNeeded),5)
         if overrite:
             count = 0
             for need in self.Wants:
@@ -103,18 +109,18 @@ class Village(object):
         self.WantsNeedsLock.acquire()
         if len(self.Needs) > 0:            
             need = self.Needs.pop(0)
-            self.DataStore.Logger.addToLog("Work Need Given: {0}".format(need.ActionNeeded), 9)
+            self.DataStore.Logger.addToLog("Work Need Given: {0}".format(need.ActionNeeded),2)
             self.WantsNeedsLock.release()
             return need.ActionNeeded
         elif len(self.Wants) > 0:
             want = self.Wants.pop(0)
-            self.DataStore.Logger.addToLog("Work Want Given: {0}".format(want.ActionNeeded), 9)
+            self.DataStore.Logger.addToLog("Work Want Given: {0}".format(want.ActionNeeded), 2)
             self.WantsNeedsLock.release()
             return want.ActionNeeded
         else:
             # If nothing else is needed gather random
             self.WantsNeedsLock.release()
-            allResources = self.DataStore.AllResources()
+            allResources = self.DataStore.gatherableResources()
             return "Gather:" + allResources[random.randint(0,len(allResources) - 1)]
 
     def VillageHasNeeds(self):

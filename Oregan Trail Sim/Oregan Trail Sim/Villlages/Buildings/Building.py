@@ -90,6 +90,9 @@ class Building(object):
         t.start()
 
     def WorkFinished(self):
+        for resource, value in self.WorkResourceProduce.iteritems():
+            if value > 0:
+                self.DataStore.Village.addResource([(resource, value)])
         return
 
     def BuildingFinished(self):

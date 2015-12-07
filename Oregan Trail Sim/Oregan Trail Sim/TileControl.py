@@ -75,11 +75,11 @@ class BuildingControl(Frame):
             return
 
         if not self.Building.Built:
-            self.lblCount["text"] = self.Building.PercentBuilt
+            self.lblCount["text"] = round(self.Building.PercentBuilt)
             self.lblCount["background"] = "Yellow"
         else:
             if self.Building.PercentWorked != 0:
-                self.lblCount["text"] = self.Building.PercentWorked
+                self.lblCount["text"] = round(self.Building.PercentWorked,0)
             else:
                 self.lblCount["text"] = ""
             self.lblCount["background"] = self.typeToColor(self.Building.BuildingType)
@@ -89,6 +89,8 @@ class BuildingControl(Frame):
             return "Brown"
         elif type == "House":
             return "Purple"
+        elif type == "FoodProcessor":
+            return "DarkGreen"
         else:
             return "White"
 

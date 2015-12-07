@@ -20,9 +20,9 @@ class LivingActor(Actor):
             self.Inventory[resource] = 0
               
         self.HungerLock = threading.Lock()
-        self.CriticalFoodLimit = 90
+        self.CriticalFoodLimit = 150
         self.AllowHungerToIncrease = True
-        self.FoodGetLimit = 30
+        self.FoodGetLimit = 50
 
         # Status of the actor
         self.Status = "Healthy"
@@ -34,15 +34,15 @@ class LivingActor(Actor):
         self.Hunger = 0
 
         # How quickly actor gets hungry hunger/s
-        self.HungerDisRate = .5
+        self.HungerDisRate = 3
 
         # Tiles/s
-        self.MoveSpeed = 2
+        self.MoveSpeed = 1
         
         self.CurrentMovePath = list()
 
         # Conversion factor for food to hunger
-        self.FoodToHungerConversion = 10        
+        self.FoodToHungerConversion = 5        
 
     def MoveTo(self, Tile):
         self.CurrentTile.RemoveActor(self)
@@ -159,6 +159,9 @@ class LivingActor(Actor):
             return
 
     def hungerChecker(self):
+        if self.Status == "Dead":
+            return 
+
         if self.AllowHungerToIncrease:
             timenow = time.time()
             diff = timenow - self.LastTime
@@ -175,7 +178,7 @@ class LivingActor(Actor):
     def AddInventory(self, resourceType, amount):
 
         if amount + self.CurrentInvCount > self.CarryLimit:
-            amount = CarryLimit - self.CurrentInvCount
+            amount = self.CarryLimit - self.CurrentInvCount
 
         if resourceType in self.Inventory.keys():
             self.CurrentInvCount += amount
