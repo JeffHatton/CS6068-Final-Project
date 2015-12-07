@@ -35,9 +35,13 @@ class Building(object):
         self.Wokers[actor.ID.GUID] = actor        
 
         if len(self.Wokers) == self.WokersRequiredToBuild and not self.Built:
+            self.Lock.release()
             self.waitForResources()            
+            return 
         elif len(self.Wokers) == self.VillagersRequiredToWork:
+            self.Lock.release()
             self.waitForResources()            
+            return 
         self.Lock.release()
 
     def RemoveActor(self, actor):

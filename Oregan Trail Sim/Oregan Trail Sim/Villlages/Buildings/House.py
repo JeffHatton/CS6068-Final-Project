@@ -17,6 +17,7 @@ class House(Building):
     def WorkFinished(self):
         actor = VilagerActor(self.DataStore, self.DataStore.EnvTiles[len(self.DataStore.EnvTiles) / 2])
         self.DataStore.AddActor(actor)
+        actor.start()
 
     def BuildingFinished(self):
         self.DataStore.addHousing(self.NumberHoused)

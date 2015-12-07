@@ -27,7 +27,7 @@ class DataStore(object):
         self.EnvLock = threading.Lock()
         self.Village = Villlages.Village.Village(self)              
         self.MiscLock = threading.Lock()
-        self.Logger = Logger(3)
+        self.Logger = Logger(2)
         self.OtherActors = dict()
         self.HousingAvilable = 0 
         self.ProspectiveHousing = 0
@@ -44,8 +44,7 @@ class DataStore(object):
             id = random.randint(0, (x * y) -1)
             if self.EnvTiles[id].ResourceType == "None":
                 self.EnvTiles[id].Structure = Villlages.Buildings.StockPile.StockPile(self, self.EnvTiles[id])
-                self.Village.addNeeds([VillageRequest("Build:{0}".format(id), 0)])
-                self.Village.addNeeds([VillageRequest("Build:{0}".format(id), 0)])
+                self.Village.addNeed(VillageRequest("Build:{0}".format(id), 0), 2)
                 break
         needActor = NeedAnalyzer(self)
         self.OtherActors[needActor.ID.GUID] = needActor

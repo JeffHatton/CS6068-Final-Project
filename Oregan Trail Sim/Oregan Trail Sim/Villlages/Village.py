@@ -38,7 +38,7 @@ class Village(object):
         for resourceType, changeValue in resourceChanges.iteritems():
             if self.Resources[resourceType] < changeValue:
                 haveAllResources = False
-                self.addNeeds(VillageRequest("Gather:" + resourceType, 1))
+                self.addNeed(VillageRequest("Gather:" + resourceType, 1), 2)
         
         if haveAllResources:
             for resourceType, changeValue in resourceChanges.iteritems():
@@ -66,20 +66,36 @@ class Village(object):
 
         self.ResourceLock.release()    
         return returnAmount    
-    
-    def addNeeds(self, Needs):
-        self.WantsNeedsLock.acquire()
-        for need in Needs:
-            self.Needs.append(need)
-            self.DataStore.Logger.addToLog("Work Need Added: {0}".format(need.ActionNeeded), 2)
+
+    def addNeed(self, Need, numberToAdd, overrite = True):
+        self.WantsNeedsLock.acquire()    
+
+        if overrite:
+            count = 0
+            for need in self.Needs:
+                if need.ActionNeeded == Need.ActionNeeded:
+                    count += 1
+            numberToAdd = max(0, numberToAdd - count)
+
+        for x in range(0, numberToAdd):
+            self.Needs.append(VillageRequest(Need.ActionNeeded, Need.Priority))
+
         self.Needs = sorted(self.Needs, key =  lambda need: need.Priority)
         self.WantsNeedsLock.release()
 
-    def addWants(self, wants):
-        self.WantsNeedsLock.acquire()
-        for need in wants:
-            self.Wants.append(need)
-            self.DataStore.Logger.addToLog("Work Want Added: {0}".format(need.ActionNeeded), 2)
+    def addWant(self, want, numberToAdd, overrite = True):
+        self.WantsNeedsLock.acquire()    
+
+        if overrite:
+            count = 0
+            for need in self.Wants:
+                if need.ActionNeeded == want.ActionNeeded:
+                    count += 1
+            numberToAdd = max(0, numberToAdd - count)
+
+        for x in range(0, numberToAdd):
+            self.Wants.append(VillageRequest(want.ActionNeeded, want.Priority))
+
         self.Wants = sorted(self.Wants, key =  lambda need: need.Priority)
         self.WantsNeedsLock.release()
 

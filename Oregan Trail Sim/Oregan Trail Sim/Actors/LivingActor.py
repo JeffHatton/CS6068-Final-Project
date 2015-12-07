@@ -15,7 +15,10 @@ class LivingActor(Actor):
         self.HP = 0
         self.CarryLimit = 25
         self.CurrentInvCount = 0;
-        self.Inventory = dict()        
+        self.Inventory = dict()      
+        for resource in dataStore.AllResources():
+            self.Inventory[resource] = 0
+              
         self.HungerLock = threading.Lock()
         self.CriticalFoodLimit = 90
         self.AllowHungerToIncrease = True

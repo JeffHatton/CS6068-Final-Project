@@ -32,25 +32,24 @@ class NeedAnalyzer(Actor):
 
     def AnalyzeMoreHouses(self):
         if len(self.DataStore.EnvActors) + 4 > self.DataStore.ProspectiveHousing:
-            self.DataStore.Logger.addToLog("Length:{0}".format(int(math.ceil((len(self.DataStore.EnvActors) + 4 - self.DataStore.ProspectiveHousing) / 5))), 0)
-            for x in range(0, int(math.ceil((len(self.DataStore.EnvActors) + 4 - self.DataStore.ProspectiveHousing) / 5))):
+            self.DataStore.Logger.addToLog("Length:{0}".format(int(math.ceil((len(self.DataStore.EnvActors) + 4 - self.DataStore.ProspectiveHousing) / 5.0))), 0)
+            for x in range(0, int(math.ceil((len(self.DataStore.EnvActors) + 4 - self.DataStore.ProspectiveHousing) / 5.0))):
                 while True:
                     id = random.randint(0, len(self.DataStore.EnvTiles) -1)
                     if self.DataStore.EnvTiles[id].ResourceType == "None":
                         self.DataStore.EnvTiles[id].Structure = House(self.DataStore, self.DataStore.EnvTiles[id])
                         self.DataStore.addProspective(5)
-                        self.DataStore.Village.addWants([VillageRequest("Build:{0}".format(id), 2)])
+                        self.DataStore.Village.addWant(VillageRequest("Build:{0}".format(id), 2), 1)
                         break
 
     def AnalyzeMoreVillagers(self):        
-        if self.AverageHungerLimitForMore < 50:
+        if self.AverageHungerLimitForMore < 50 and len(self.DataStore.EnvActors) + 1 <= self.DataStore.HousingAvilable:
             if self.DataStore.Village.Resources["Food"] / self.TotalConsumption > self.StoreLimitForMore:
-                self.DataStore.Village.addWants({VillageRequest("Mate", 1)})
-                self.DataStore.Village.addWants({VillageRequest("Mate", 1)})
+                self.DataStore.Village.addWant(VillageRequest("Mate", 1), 2)
             else:
-                self.DataStore.Village.addWants({VillageRequest("Gather:Food", 2)})
+                self.DataStore.Village.addWant(VillageRequest("Gather:Food", 2), 1)
         else:
-            self.DataStore.Village.addWants({VillageRequest("Gather:Food", 1)})
+            self.DataStore.Village.addWant(VillageRequest("Gather:Food", 1), 1)
 
     def AnalyzeFood(self):
         if len(self.DataStore.EnvActors) == 0:
@@ -67,9 +66,6 @@ class NeedAnalyzer(Actor):
             averageConsumption += actor.HungerDisRate
         diffFoods = (self.FoodStockPilePreference * totalFoodNeeded) - self.DataStore.Village.Resources["Food"] 
         if diffFoods > 0:
-            needsList = list()
-            for x in range(0, int(math.ceil(diffFoods / self.FoodPerWorkerNeededNeeded))):
-                needsList.append(VillageRequest("Gather:Food", 0))
-            self.DataStore.Village.addNeeds(needsList)
+            self.DataStore.Village.addNeed(VillageRequest("Gather:Food", 0), int(math.ceil(diffFoods / self.FoodPerWorkerNeededNeeded)))
         self.AverageHunger = averageHunger / len(self.DataStore.EnvActors)
         self.TotalConsumption = averageConsumption

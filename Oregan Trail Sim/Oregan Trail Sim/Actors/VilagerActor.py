@@ -200,6 +200,6 @@ class VilagerActor(LivingActor):
 
     def findIdleBuilding(self, tile, buildingType):
         if tile.Structure != None:
-            if tile.Structure.BuildingType == buildingType and not tile.Structure.WorkInProgress:
+            if tile.Structure.BuildingType == buildingType and not tile.Structure.WorkInProgress and tile.Structure.Built:
                 return True
         return False
