@@ -37,7 +37,7 @@ class DataStore(object):
 
         numVillagers = int(root.attrib.get("villagers"))
         for idx in range(numVillagers):
-            actor = VilagerActor(self, self.EnvTiles[x /2 + y/2])
+            actor = VilagerActor(self, self.EnvTiles[x /2 + (y/2*x)])
             self.AddActor(actor)
 
         while True:
@@ -102,4 +102,3 @@ class DataStore(object):
             actor.stop_requested = True
         for key,actor in self.OtherActors.iteritems():
             actor.stop_requested = True
-        self.Logger.saveToFile()

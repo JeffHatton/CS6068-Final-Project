@@ -12,7 +12,7 @@ class VilagerActor(LivingActor):
         gather = random.randint(0,2)
         self.PreferedAction = "Gather"
         self.gatherRandomResource()                             
-        self.self.ThreadSleepTime = 0       
+        self.ThreadSleepTime = 0       
 
     def run(self):        
         while not self.stop_requested:                
