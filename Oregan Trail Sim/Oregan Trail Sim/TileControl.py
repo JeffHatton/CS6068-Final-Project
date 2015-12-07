@@ -74,8 +74,8 @@ class BuildingControl(Frame):
         if self.Building == None:
             return
 
-        if not self.Building.Built:
-            self.lblCount["text"] = round(self.Building.PercentBuilt)
+        if self.Building.PercentBuilt != 100:
+            self.lblCount["text"] = int(self.Building.PercentBuilt)
             self.lblCount["background"] = "Yellow"
         else:
             if self.Building.PercentWorked != 0:

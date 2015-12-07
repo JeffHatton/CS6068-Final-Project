@@ -1,5 +1,6 @@
 ﻿import Ids.IdConverter
 import threading
+import Tkinter
 import Villlages.Village
 import Villlages.Buildings
 import Villlages.Buildings.StockPile
@@ -32,22 +33,29 @@ class DataStore(object):
         self.MiscLock = threading.Lock()
         self.Logger = Logger(0)
         self.OtherActors = dict()
+        self.TimeScaling = Tkinter.StringVar()
+        self.TimeScaling.set("5")
         self.HousingAvilable = 0 
         self.NumBuildings = 0
         self.ProspectiveHousing = 0
+        self.StockPiles = 0
+        self.ProspectiveStockPiles = 0
         self.refineMap = {"Food" : "FoodProcessor", "PIron": "IronProcessor" , "PStone":"StoneProcessor"}
         for tile in TileGenerator.generateTileGrid(x, y, seed):
             tile.ID.LocalId = self.TileIdConverter.Convert2dTo1d(tile.ID.IdX,tile.ID.IdY)
             self.AddTile(tile)
 
+        numVillagers = int(root.attrib.get("villagers"))
+        for idx in range(numVillagers):
+            actor = VilagerActor(self, self.EnvTiles[x /2 + (y/2*x)])
+            self.AddActor(actor)
+
         while True:
             id = random.randint(0, (x * y) -1)
-            if self.EnvTiles[id].Walkable:
-                numVillagers = int(root.attrib.get("villagers"))
-                for idx in range(numVillagers):
-                    actor = VilagerActor(self, self.EnvTiles[x /2 + y/2])
-                    self.AddActor(actor)
-                break       
+            if self.EnvTiles[id].ResourceType == "None":
+                self.EnvTiles[id].Structure = Villlages.Buildings.StockPile.StockPile(self, self.EnvTiles[id])
+                self.Village.addNeed(VillageRequest("Build:{0}".format(id), 0), 2)
+                break
 
         #while True:
         #    id = random.randint(0, (x * y) -1)
@@ -67,6 +75,17 @@ class DataStore(object):
     def addProspective(self, amount):
         self.MiscLock.acquire()
         self.ProspectiveHousing += amount
+        self.MiscLock.release()
+
+    def addProspectiveStockPile(self):
+        self.MiscLock.acquire()
+        self.ProspectiveStockPiles += 1
+        self.MiscLock.release()
+
+    def addStockPile(self):
+        self.MiscLock.acquire()
+        self.StockPiles += 1
+        self.StockPiles -= 1
         self.MiscLock.release()
 
     def AddActor(self, actor):
