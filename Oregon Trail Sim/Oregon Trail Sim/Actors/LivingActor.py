@@ -159,6 +159,7 @@ class LivingActor(Actor):
             return
 
     def hungerChecker(self):
+        return
         if self.Status == "Dead":
             return
 

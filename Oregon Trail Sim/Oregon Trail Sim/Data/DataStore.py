@@ -11,6 +11,8 @@ from Actors.VilagerActor import *
 from Logger.Logger import *
 from Actors.NeedAnalyzer import *
 import collections
+from Villlages.Buildings.House import *
+from Villlages.VillageRequest import *
 
 class DataStore(object):
     """Global Storage for Application"""
@@ -33,6 +35,7 @@ class DataStore(object):
         self.Logger = Logger(0)
         self.OtherActors = dict()
         self.TimeScaling = 100000000000
+        self.TotalHousing = 40
         self.HousingAvilable = 0
         self.NumBuildings = 0
         self.ProspectiveHousing = 0
@@ -58,9 +61,17 @@ class DataStore(object):
         self.OtherActors[needActor.ID.GUID] = needActor
         needActor.start()
 
+        for i in range(0, 40):
+          id = self.getBuildingPoint()
+          self.EnvTiles[id].Structure = House(self, self.EnvTiles[id])
+          self.Village.addWant(VillageRequest("Build:{0}".format(id), 2), self.EnvTiles[id].Structure.WokersRequiredToBuild)
+
     def addHousing(self, amount):
         self.MiscLock.acquire()
         self.HousingAvilable += amount
+        self.TotalHousing -= 1
+        if self.TotalHousing == 0:
+          os._exit(0)
         self.MiscLock.release()
 
     def addProspective(self, amount):
@@ -110,6 +121,7 @@ class DataStore(object):
         self.EnvironmentDimY = y
 
     def StartSim(self):
+        self.Logger.addToLog("Started Sim: {0}".format(time.time()), 0)
         for key,actor in self.EnvActors.iteritems():
             actor.start()
 
@@ -130,6 +142,7 @@ class DataStore(object):
             actor.stop_requested = True
         for key,actor in self.OtherActors.iteritems():
             actor.stop_requested = True
+        self.DataStore.Logger.addToLog("End Of Sim", 3)
         #self.Logger.saveToFile()
 
     def AddBuilding(self, amount):

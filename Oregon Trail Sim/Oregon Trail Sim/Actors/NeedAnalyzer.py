@@ -24,6 +24,7 @@ class NeedAnalyzer(Actor):
         Actor.__init__(self, dataStore)
 
     def run(self):
+        return
         while not self.stop_requested:
             self.AnalyzeFood()
             self.AnalyzeMoreVillagers()
@@ -35,7 +36,7 @@ class NeedAnalyzer(Actor):
 
             self.Counter += 1
             #self.AnalyzeStockPiles()
-            time.sleep(.5 / (float(self.DataStore.TimeScaling) / 10))            
+            time.sleep(.5 / (float(self.DataStore.TimeScaling) / 10))
 
     def MoreStockPiles(self):
         if len(self.DataStore.findAllIdleReadBuildings("StockPile", self.DataStore.DoesBuildingExist)) < len(self.DataStore.EnvActors) / 10:

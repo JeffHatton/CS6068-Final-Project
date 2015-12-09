@@ -68,6 +68,7 @@ class Building(object):
             self.DataStore.addFresh(self.Tile)
             self.Wokers.clear()
             self.DataStore.addFresh(self.Tile)
+            self.DataStore.Logger.addToLog("Finished House: {0} at {1}".format(self.BuildingType, time.time()), 0)
 
             return
         t = Timer(.5  / (float(self.DataStore.TimeScaling) / 10), self.Build)

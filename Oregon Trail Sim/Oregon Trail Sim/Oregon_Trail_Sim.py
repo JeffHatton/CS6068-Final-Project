@@ -38,7 +38,10 @@ class Application(Frame):
         time.sleep(0.2)
         self.master.destroy()
 
-root = Tk()
-app = Application(master=root)
-root.protocol("WM_DELETE_WINDOW", app.onClose)
-app.mainloop()
+#root = Tk()
+#app = Application(master=root)
+#root.protocol("WM_DELETE_WINDOW", app.onClose)
+#app.mainloop()
+
+dataStore = Data.DataStore.DataStore('init.xml')
+dataStore.StartSim()

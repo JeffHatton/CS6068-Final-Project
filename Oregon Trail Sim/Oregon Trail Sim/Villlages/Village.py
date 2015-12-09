@@ -16,15 +16,15 @@ class Village(object):
 
         for resource in dataStore.AllResources():
             self.Resources[resource] = 0
-        self.Resources["Wood"] = 500
-        self.Resources["Stone"] = 500
-        self.Resources["Iron"] = 500
+        self.Resources["Wood"] = 5000000000000
+        self.Resources["Stone"] = 500000000000
+        self.Resources["Iron"] = 5000000000000
         self.DataStore = dataStore
         self.Needs = list()
         self.Wants = list()
 
     def addResource(self, resourceChanges):
-        self.ResourceLock.acquire()        
+        self.ResourceLock.acquire()
         for resourceType, changeValue in resourceChanges:
             self.DataStore.Logger.addToLog("{0} {1} Collected".format(changeValue, resourceType), 1)
             if resourceType not in self.Resources.keys():
@@ -44,20 +44,20 @@ class Village(object):
                     self.addWant(VillageRequest("Refine:" + resourceType, 1), 2)
                 else:
                     self.addWant(VillageRequest("Gather:" + resourceType, 1), 2)
-        
+
         if haveAllResources:
             for resourceType, changeValue in resourceChanges.iteritems():
-                self.Resources[resourceType] -= changeValue     
-        self.ResourceLock.release()    
+                self.Resources[resourceType] -= changeValue
+        self.ResourceLock.release()
 
         return haveAllResources
 
     def requestResource(self, resourceType, amount, allOrNothing = True):
-        self.ResourceLock.acquire()        
-        returnAmount = 0             
+        self.ResourceLock.acquire()
+        returnAmount = 0
 
         if resourceType not in self.Resources.keys():
-            self.ResourceLock.release()    
+            self.ResourceLock.release()
             return returnAmount
 
         self.DataStore.Logger.addToLog("{0} {1} Requested".format(amount, resourceType), 3)
@@ -69,11 +69,11 @@ class Village(object):
             self.Resources[resourceType] = 0
             returnAmount = temp
 
-        self.ResourceLock.release()    
-        return returnAmount    
+        self.ResourceLock.release()
+        return returnAmount
 
     def addNeed(self, Need, numberToAdd, overrite = True):
-        self.WantsNeedsLock.acquire()    
+        self.WantsNeedsLock.acquire()
         self.DataStore.Logger.addToLog("{0} Need Added: {1}".format(numberToAdd, Need.ActionNeeded),5)
 
         if overrite:
@@ -90,7 +90,7 @@ class Village(object):
         self.WantsNeedsLock.release()
 
     def addWant(self, want, numberToAdd, overrite = True):
-        self.WantsNeedsLock.acquire()    
+        self.WantsNeedsLock.acquire()
         self.DataStore.Logger.addToLog("{0} Want Added: {1}".format(numberToAdd, want.ActionNeeded),5)
         if overrite:
             count = 0
@@ -107,7 +107,7 @@ class Village(object):
 
     def giveWork(self):
         self.WantsNeedsLock.acquire()
-        if len(self.Needs) > 0:            
+        if len(self.Needs) > 0:
             need = self.Needs.pop(0)
             self.DataStore.Logger.addToLog("Work Need Given: {0}".format(need.ActionNeeded),2)
             self.WantsNeedsLock.release()
