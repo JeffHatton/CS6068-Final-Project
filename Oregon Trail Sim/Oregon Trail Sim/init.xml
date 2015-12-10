@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Village width="20" height="20" villagers="20">
-  <TileGenerator>123456484484421549878421549874561325</TileGenerator>
+<Village width="20" height="20" villagers="49">
+	<TileGenerator>629426204605553448</TileGenerator>
+	<NumberOfHouses>40</NumberOfHouses>
 </Village>

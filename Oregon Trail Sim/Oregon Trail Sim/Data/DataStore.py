@@ -8,6 +8,7 @@ import xml.etree.ElementTree as ET
 import math
 from Tiles.TileGenerator import *
 from Actors.VilagerActor import *
+from Actors.KillMeActor import *
 from Logger.Logger import *
 from Actors.NeedAnalyzer import *
 import collections
@@ -24,7 +25,10 @@ class DataStore(object):
         self.y = int(root.attrib.get("height"))
         x = self.x
         y = self.y
-        seed = root.find("TileGenerator").text
+        h = int(root.find("NumberOfHouses").text)
+        self.seed = int(root.find("TileGenerator").text)
+        #self.seed = random.randint(0, sys.maxint)
+        #print("Seed: " + str(self.seed))
         self.EnvActors = dict()
         self.EnvTiles = dict()
         self.SetEnvironmentDim(x, y)
@@ -35,7 +39,7 @@ class DataStore(object):
         self.Logger = Logger(0)
         self.OtherActors = dict()
         self.TimeScaling = 100000000000
-        self.TotalHousing = 40
+        self.TotalHousing = h
         self.HousingAvilable = 0
         self.NumBuildings = 0
         self.ProspectiveHousing = 0
@@ -45,7 +49,7 @@ class DataStore(object):
         self.RefreshQue = collections.deque()
         self.RefreshQueLock = Lock()
 
-        for tile in TileGenerator.generateTileGrid(x, y, self, seed):
+        for tile in TileGenerator.generateTileGrid(x, y, self, self.seed):
             tile.ID.LocalId = self.TileIdConverter.Convert2dTo1d(tile.ID.IdX,tile.ID.IdY)
             self.AddTile(tile)
 
@@ -61,7 +65,7 @@ class DataStore(object):
         self.OtherActors[needActor.ID.GUID] = needActor
         needActor.start()
 
-        for i in range(0, 40):
+        for i in range(0, h):
           id = self.getBuildingPoint()
           self.EnvTiles[id].Structure = House(self, self.EnvTiles[id])
           self.Village.addWant(VillageRequest("Build:{0}".format(id), 2), self.EnvTiles[id].Structure.WokersRequiredToBuild)
@@ -121,9 +125,12 @@ class DataStore(object):
         self.EnvironmentDimY = y
 
     def StartSim(self):
-        self.Logger.addToLog("Started Sim: {0}".format(time.time()), 0)
+        t = time.time()
+        self.Logger.addToLog("Started Sim: {0}".format(t), 0)
         for key,actor in self.EnvActors.iteritems():
             actor.start()
+        actor = KillMeActor(self, t)
+        actor.start()
 
     def AllResources(self):
         return ["Wood", "Food", "Stone", "Iron", "PIron", "PStone"]
@@ -201,6 +208,7 @@ class DataStore(object):
 
     def getBuildingPoint(self):
         count = 0
+        random.seed(self.seed)
         if self.NumBuildings == 0 :
             range = 4
         else:
